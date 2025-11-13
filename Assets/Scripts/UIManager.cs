@@ -6,8 +6,7 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
     [SerializeField] private TextMeshProUGUI amountText;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
         if(Instance == null || Instance.enabled == false)
         {
@@ -21,6 +20,6 @@ public class UIManager : MonoBehaviour
 
     public void UpdateUI(int amount)
     {
-        amountText.text = $"COINS: {amount:d3}";
+        amountText.text = $"COINS: {amount:d2}";
     }
 }
