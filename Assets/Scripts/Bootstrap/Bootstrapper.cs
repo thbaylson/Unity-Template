@@ -9,8 +9,7 @@ public class Bootstrapper : MonoBehaviour
     [SerializeField] private BootstrapConfig config;
 
     // To prevent duplicate manager instantiation
-    private readonly Dictionary<string, GameObject> _persistentInstances 
-        = new Dictionary<string, GameObject>();
+    private readonly Dictionary<string, GameObject> _persistentInstances = new Dictionary<string, GameObject>();
 
     private void Awake()
     {
@@ -44,8 +43,7 @@ public class Bootstrapper : MonoBehaviour
 
     private void InitializePersistentManagers()
     {
-        if (config.persistentManagers == null)
-            return;
+        if (config.persistentManagers == null) return;
 
         foreach (var entry in config.persistentManagers)
         {
@@ -64,17 +62,14 @@ public class Bootstrapper : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // Ignore the bootstrap scene itself
-        if (scene.name == config.bootstrapSceneName)
-            return;
+        if (scene.name == config.bootstrapSceneName) return;
 
         var profile = config.GetProfileForScene(scene.name);
-        if (profile == null || profile.perSceneManagers == null)
-            return;
+        if (profile == null || profile.perSceneManagers == null) return;
 
         foreach (var prefab in profile.perSceneManagers)
         {
-            if (prefab == null)
-                continue;
+            if (prefab == null) continue;
 
             var instance = Instantiate(prefab);
             instance.name = prefab.name;

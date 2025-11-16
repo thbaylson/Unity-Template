@@ -1,15 +1,15 @@
 using UnityEngine;
 
-public class Collectable : MonoBehaviour
+public class GoldCollectable : MonoBehaviour
 {
     [SerializeField] private int amount = 1;
 
     void OnTriggerEnter(Collider other)
     {
-        Collector collect = other.GetComponentInChildren<Collector>();
+        var collect = other.GetComponentInChildren<GoldCollector>();
         if(collect != null)
         {
-            collect.CollectItem(amount);
+            collect.CollectGold(amount);
             Despawn();
         }
     }
