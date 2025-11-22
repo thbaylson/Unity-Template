@@ -1,0 +1,57 @@
+name: Unity Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE || '' }}
+
+jobs:
+  editmode:
+    name: Edit Mode Tests
+    if: ${{ env.UNITY_LICENSE != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Packages/manifest.json') }}
+          restore-keys: |
+            Library-
+      - name: Run Edit Mode tests
+        uses: game-ci/unity-test-runner@v4
+        with:
+          unityVersion: 6000.0.61f1
+          testMode: editmode
+          customParameters: -nographics
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+  playmode:
+    name: Play Mode Tests
+    if: ${{ env.UNITY_LICENSE != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Packages/manifest.json') }}
+          restore-keys: |
+            Library-
+      - name: Run Play Mode tests
+        uses: game-ci/unity-test-runner@v4
+        with:
+          unityVersion: 6000.0.61f1
+          testMode: playmode
+          customParameters: -nographics
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
