@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bootstrapSceneName: Bootstrap
   persistentManagers:
-  - key: 
-    prefab: {fileID: 0}
-  sceneProfiles: []
+  - key: UI
+    prefab: {fileID: 6729379069854445528, guid: d2531ba1c5b2846439e64f7e3238f4e5, type: 3}
+  sceneProfiles:
+  - sceneName: SmallScene
+    perSceneManagers:
+    - {fileID: 7101777820484897687, guid: 58ccd4d51614b2f42b94ca24c11eea3c, type: 3}

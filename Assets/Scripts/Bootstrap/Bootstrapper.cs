@@ -31,6 +31,13 @@ public class Bootstrapper : MonoBehaviour
         InitializePersistentManagers();
     }
 
+    private void Start()
+    {
+        // The Bootstrap scene is loaded additively at runtime AFTER
+        // the scene that was run from the editor.
+        ProcessLoadedScenes();
+    }
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -59,9 +66,26 @@ public class Bootstrapper : MonoBehaviour
         }
     }
 
+    private void ProcessLoadedScenes()
+    {
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            var scene = SceneManager.GetSceneAt(i);
+            TrySetupScene(scene);
+        }
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Ignore the bootstrap scene itself
+        TrySetupScene(scene);
+    }
+
+    private void TrySetupScene(Scene scene)
+    {
+        if (!scene.isLoaded) return;
+        if (config == null) return;
+
+        // Ignore bootstrap scene
         if (scene.name == config.bootstrapSceneName) return;
 
         var profile = config.GetProfileForScene(scene.name);
@@ -73,6 +97,8 @@ public class Bootstrapper : MonoBehaviour
 
             var instance = Instantiate(prefab);
             instance.name = prefab.name;
+
+            // Ensure the object belongs to the target content scene
             SceneManager.MoveGameObjectToScene(instance, scene);
         }
     }

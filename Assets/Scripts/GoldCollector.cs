@@ -7,6 +7,11 @@ public class GoldCollector : MonoBehaviour
 
     public int Gold { get; private set; }
 
+    private void Start()
+    {
+        OnGoldCollected?.Invoke(Gold);
+    }
+
     public void CollectGold(int amount)
     {
         Gold += amount;
