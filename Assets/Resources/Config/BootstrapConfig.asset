@@ -20,3 +20,4 @@ MonoBehaviour:
   - sceneName: SmallScene
     perSceneManagers:
     - {fileID: 7101777820484897687, guid: 58ccd4d51614b2f42b94ca24c11eea3c, type: 3}
+    - {fileID: 7655372193881906233, guid: e973cb6fbcfbd6c42ab6a29f8a3fcb8a, type: 3}

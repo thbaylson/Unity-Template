@@ -99,7 +99,8 @@ public class Bootstrapper : MonoBehaviour
             instance.name = prefab.name;
 
             // Ensure the object belongs to the target content scene
-            SceneManager.MoveGameObjectToScene(instance, scene);
+            // TODO: This is throwing an error in the console. Investigate if needed.
+            //SceneManager.MoveGameObjectToScene(instance, scene);
         }
     }
 }
