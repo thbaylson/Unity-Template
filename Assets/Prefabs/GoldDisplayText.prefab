@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1890130052081789735}
   - component: {fileID: 2817993723242813373}
   - component: {fileID: 2875739040295764898}
+  - component: {fileID: 8174500811337309660}
   m_Layer: 5
   m_Name: GoldDisplayText
   m_TagString: Untagged
@@ -150,3 +151,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   amountText: {fileID: 2817993723242813373}
+--- !u!114 &8174500811337309660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7101777820484897687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0a5a653f0dde214e8bee34118f5cc62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layer: 0

@@ -27,6 +27,7 @@ public class PlayerManager : MonoBehaviour
         if (playerPrefab != null)
         {
             playerInstance = Instantiate(playerPrefab);
+            playerInstance.name = playerPrefab.name;
             DontDestroyOnLoad(playerInstance);
         }
         else

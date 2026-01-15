@@ -3,14 +3,19 @@ using UnityEngine;
 
 public class GoldUI : MonoBehaviour
 {
+    public static GoldUI Instance { get; private set; }
+
     [SerializeField] private TextMeshProUGUI amountText;
 
     private void Awake()
     {
-        if (UIManager.Instance != null)
+        if (Instance != null && Instance != this)
         {
-            UIManager.Instance.AttachToLayer(transform, UiLayer.Hud);
+            Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
     }
 
     private void OnEnable()
