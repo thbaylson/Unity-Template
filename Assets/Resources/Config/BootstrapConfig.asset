@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5870c078046b80d46bda1af2b41567d6, type: 3}
+  m_Name: BootstrapConfig
+  m_EditorClassIdentifier: 
+  bootstrapSceneName: Bootstrap
+  persistentManagers:
+  - key: UI
+    prefab: {fileID: 6729379069854445528, guid: d2531ba1c5b2846439e64f7e3238f4e5, type: 3}
+  sceneProfiles:
+  - sceneName: SmallScene
+    perSceneManagers:
+    - {fileID: 7101777820484897687, guid: 58ccd4d51614b2f42b94ca24c11eea3c, type: 3}
+    - {fileID: 7655372193881906233, guid: e973cb6fbcfbd6c42ab6a29f8a3fcb8a, type: 3}
+  - sceneName: BiggerScene
+    perSceneManagers:
+    - {fileID: 7101777820484897687, guid: 58ccd4d51614b2f42b94ca24c11eea3c, type: 3}
+    - {fileID: 7655372193881906233, guid: e973cb6fbcfbd6c42ab6a29f8a3fcb8a, type: 3}
+  - sceneName: FlatScene
+    perSceneManagers:
+    - {fileID: 7655372193881906233, guid: e973cb6fbcfbd6c42ab6a29f8a3fcb8a, type: 3}
