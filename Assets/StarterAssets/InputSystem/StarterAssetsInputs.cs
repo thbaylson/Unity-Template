@@ -20,8 +20,35 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
+        private void OnEnable()
+        {
+            if(Services.PauseService != null)
+			{
+                Services.PauseService.PausedChanged += OnPausedChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (Services.PauseService != null)
+			{
+                Services.PauseService.PausedChanged -= OnPausedChanged;
+            }
+        }
+
+        private void OnPausedChanged(bool paused)
+        {
+            cursorInputForLook = !paused;
+
+            // Flush input when pausing/unpausing.
+            move = Vector2.zero;
+            look = Vector2.zero;
+            jump = false;
+            sprint = false;
+        }
+
 #if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
+        public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
 		}
@@ -34,19 +61,26 @@ namespace StarterAssets
 			}
 		}
 
-		public void OnJump(InputValue value)
-		{
-			JumpInput(value.isPressed);
-		}
+        public void OnJump(InputValue value)
+        {
+            if (Services.PauseService?.IsPaused ?? false) return;
+            JumpInput(value.isPressed);
+        }
 
-		public void OnSprint(InputValue value)
+        public void OnSprint(InputValue value)
 		{
 			SprintInput(value.isPressed);
 		}
+
+		public void OnPause(InputValue value)
+		{
+			if(!value.isPressed) return;
+            PauseInput();
+        }
 #endif
 
 
-		public void MoveInput(Vector2 newMoveDirection)
+        public void MoveInput(Vector2 newMoveDirection)
 		{
 			move = newMoveDirection;
 		} 
@@ -66,15 +100,9 @@ namespace StarterAssets
 			sprint = newSprintState;
 		}
 
-		private void OnApplicationFocus(bool hasFocus)
+		public void PauseInput()
 		{
-			SetCursorState(cursorLocked);
-		}
-
-		private void SetCursorState(bool newState)
-		{
-			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
-		}
+            Services.PauseService?.Toggle();
+        }
 	}
-	
 }

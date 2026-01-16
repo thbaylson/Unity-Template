@@ -9,8 +9,8 @@ public class LevelTransition : MonoBehaviour
         int totalLevels = UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings;
         int nextLevel = (currentLevel + 1) % totalLevels;
 
-        // Level index 0 is the bootstrapper scene.
-        nextLevel = nextLevel == 0 ? 1 : nextLevel;
+        // Level index 0 is the title screen, index 1 is the bootstrapper scene.
+        nextLevel = nextLevel < 2 ? 2 : nextLevel;
 
         UnityEngine.SceneManagement.SceneManager.LoadScene(nextLevel);
     }

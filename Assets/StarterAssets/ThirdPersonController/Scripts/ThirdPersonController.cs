@@ -125,6 +125,8 @@ namespace StarterAssets
 
         private void Awake()
         {
+            Services.PauseService?.RegisterPlayerInput(_playerInput);
+
             // get a reference to our main camera
             if (_mainCamera == null)
             {
