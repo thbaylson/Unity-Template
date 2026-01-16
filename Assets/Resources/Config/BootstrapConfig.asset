@@ -16,6 +16,8 @@ MonoBehaviour:
   persistentManagers:
   - key: UI
     prefab: {fileID: 6729379069854445528, guid: d2531ba1c5b2846439e64f7e3238f4e5, type: 3}
+  - key: PauseService
+    prefab: {fileID: 147148632797817898, guid: f022a769d96c9f34ea909d0e830a97e8, type: 3}
   sceneProfiles:
   - sceneName: TitleScene
     perSceneManagers: []
