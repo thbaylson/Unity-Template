@@ -16,7 +16,14 @@ MonoBehaviour:
   persistentManagers:
   - key: UI
     prefab: {fileID: 6729379069854445528, guid: d2531ba1c5b2846439e64f7e3238f4e5, type: 3}
+  - key: PauseService
+    prefab: {fileID: 147148632797817898, guid: f022a769d96c9f34ea909d0e830a97e8, type: 3}
+  - key: PauseScreen
+    prefab: {fileID: 1258918597769642642, guid: 6a8fa030b6857df42a45498ef92f63f9, type: 3}
   sceneProfiles:
+  - sceneName: Title
+    perSceneManagers:
+    - {fileID: 4627849991873522535, guid: ea4ed649512de4b4b888d368d661393a, type: 3}
   - sceneName: SmallScene
     perSceneManagers:
     - {fileID: 7101777820484897687, guid: 58ccd4d51614b2f42b94ca24c11eea3c, type: 3}
