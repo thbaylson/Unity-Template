@@ -27,6 +27,9 @@ public class PauseService : MonoBehaviour, IPauseService
     private PlayerInput playerInput;
     private PauseMenuUI menuUI;
 
+    /// The reason we assign this input action here instead of setting it up in 
+    /// StarterAssetsInputs is because EventSystem was consuming the Close input 
+    /// before it ever got to StarterAssetsInputs. Thus, we subscribe to the EventSystem itself instead.
     private InputAction _cancelAction;
 
     private void Awake()
@@ -86,7 +89,6 @@ public class PauseService : MonoBehaviour, IPauseService
         playerInput.SwitchCurrentActionMap(IsPaused ? uiMap : gameplayMap);
     }
 
-    // This should never be destroyed, but just in case, unpause.
     private void OnDisable()
     {
         if (_cancelAction != null)
