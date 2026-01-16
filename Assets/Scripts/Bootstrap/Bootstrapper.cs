@@ -92,7 +92,15 @@ public class Bootstrapper : MonoBehaviour
         if(_sceneManagers.Count == 0) return;
 
         var profile = config.GetProfileForScene(scene.name);
-        if (profile == null || profile.perSceneManagers.Length == 0) return;
+        if (profile == null)
+        {
+            foreach (var instance in _sceneManagers)
+            {
+                Destroy(instance.Value);
+            }
+            _sceneManagers.Clear();
+            return;
+        }
 
         var nextSceneManagerNames = profile.perSceneManagers.Select(m => m.name).ToHashSet();
         var instancesToRemove = new List<string>();

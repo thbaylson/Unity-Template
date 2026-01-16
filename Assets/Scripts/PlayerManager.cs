@@ -35,4 +35,12 @@ public class PlayerManager : MonoBehaviour
             // TODO: Error logging
         }
     }
+
+    void OnDestroy()
+    {
+        if (playerInstance != null)
+        {
+            Destroy(playerInstance);
+        }
+    }
 }

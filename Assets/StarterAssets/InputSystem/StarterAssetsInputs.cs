@@ -12,7 +12,6 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
-		public bool pause;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -21,8 +20,35 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
+        private void OnEnable()
+        {
+            if(Services.PauseService != null)
+			{
+                Services.PauseService.PausedChanged += OnPausedChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (Services.PauseService != null)
+			{
+                Services.PauseService.PausedChanged -= OnPausedChanged;
+            }
+        }
+
+        private void OnPausedChanged(bool paused)
+        {
+            cursorInputForLook = !paused;
+
+            // Flush input when pausing/unpausing.
+            move = Vector2.zero;
+            look = Vector2.zero;
+            jump = false;
+            sprint = false;
+        }
+
 #if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
+        public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
 		}
@@ -35,20 +61,21 @@ namespace StarterAssets
 			}
 		}
 
-		public void OnJump(InputValue value)
-		{
-			JumpInput(value.isPressed);
-		}
+        public void OnJump(InputValue value)
+        {
+            if (Services.PauseService?.IsPaused ?? false) return;
+            JumpInput(value.isPressed);
+        }
 
-		public void OnSprint(InputValue value)
+        public void OnSprint(InputValue value)
 		{
 			SprintInput(value.isPressed);
 		}
 
 		public void OnPause(InputValue value)
 		{
-			Debug.Log("Pause input received");
-            PauseInput(value.isPressed);
+			if(!value.isPressed) return;
+            PauseInput();
         }
 #endif
 
@@ -73,21 +100,9 @@ namespace StarterAssets
 			sprint = newSprintState;
 		}
 
-		public void PauseInput(bool newPauseState)
+		public void PauseInput()
 		{
-			pause = newPauseState;
-			Services.PauseService?.SetPaused(newPauseState);
+            Services.PauseService?.Toggle();
         }
-
-        private void OnApplicationFocus(bool hasFocus)
-		{
-			//SetCursorState(cursorLocked);
-		}
-
-		private void SetCursorState(bool newState)
-		{
-			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
-		}
 	}
-	
 }

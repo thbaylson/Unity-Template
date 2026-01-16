@@ -29,6 +29,8 @@ public class PauseMenuUI : MonoBehaviour
         Instance = this;
         Services.PauseService?.RegisterMenu(this);
 
+        GetComponent<UILayerAttachment>()?.AttachToLayer();
+
         if (resumeButton) resumeButton.onClick.AddListener(Resume);
         if (returnToTitleButton) returnToTitleButton.onClick.AddListener(ReturnToTitle);
         if (saveButton) saveButton.onClick.AddListener(Save);
