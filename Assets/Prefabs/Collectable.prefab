@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1372272033503716287}
   - component: {fileID: 1762257363878735526}
   - component: {fileID: 134160576104057920}
+  - component: {fileID: 1079635446336457685}
   - component: {fileID: 283571191652235710}
   m_Layer: 0
   m_Name: Collectable
@@ -123,6 +124,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: {x: 0, y: 300, z: 0}
+--- !u!114 &1079635446336457685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2417654134090450016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c76fb57461ffaec4e9877818b97fdbee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _id: 6e77ec85bab242f58ea62b59eaa47196
 --- !u!114 &283571191652235710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,4 +149,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 415c161cec77f2746aef91adf98df141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveable: {fileID: 1079635446336457685}
   amount: 1

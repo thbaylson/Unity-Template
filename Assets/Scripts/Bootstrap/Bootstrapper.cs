@@ -35,6 +35,8 @@ public class Bootstrapper : MonoBehaviour
 
     private void Start()
     {
+        Services.SaveService?.LoadGame();
+
         // The Bootstrap scene is loaded additively at runtime AFTER
         // the scene that was run from the editor.
         ProcessLoadedScenes();

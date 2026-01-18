@@ -27,13 +27,8 @@ public class TitleScreenManager : MonoBehaviour
 
     private void RefreshButtonVisibility()
     {
-        // TODO: Update this when implementing save/load system.
-        bool hasSave = false;
-
-        if (loadGameButton != null)
-        {
-            loadGameButton.gameObject.SetActive(hasSave);
-        }
+        bool hasSave = Services.SaveService.LoadGameExists();
+        loadGameButton.gameObject.SetActive(hasSave);
     }
 
     private void EnsureValidSelection()
@@ -49,13 +44,14 @@ public class TitleScreenManager : MonoBehaviour
 
     private void OnNewGame()
     {
-        // TODO: Update this when implementing save/load system.
+        // TODO: Add confirmation popup if a save already exists.
+        Services.SaveService.DeleteGame();
         UnityEngine.SceneManagement.SceneManager.LoadScene(firstGameplayScene);
     }
 
     private void OnLoadGame()
     {
-        // TODO: Update this when implementing save/load system.
+        Services.SaveService.LoadGame();
         UnityEngine.SceneManagement.SceneManager.LoadScene(firstGameplayScene);
     }
 

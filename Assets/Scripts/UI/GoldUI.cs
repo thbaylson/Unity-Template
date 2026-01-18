@@ -20,12 +20,14 @@ public class GoldUI : MonoBehaviour
 
     private void OnEnable()
     {
-        GoldCollector.OnGoldCollected += HandleCoinsChanged;
+        GoldCollector.OnGoldChanged += HandleCoinsChanged;
+        GoldCollector.OnStateRefresh += HandleCoinsChanged;
     }
 
     private void OnDisable()
     {
-        GoldCollector.OnGoldCollected -= HandleCoinsChanged;
+        GoldCollector.OnGoldChanged -= HandleCoinsChanged;
+        GoldCollector.OnStateRefresh -= HandleCoinsChanged;
     }
 
     private void HandleCoinsChanged(int amount)

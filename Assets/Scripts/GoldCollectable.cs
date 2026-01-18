@@ -1,8 +1,9 @@
 using UnityEngine;
 
-public class GoldCollectable : MonoBehaviour
+public class GoldCollectable : LevelFlaggable
 {
     [SerializeField] private int amount = 1;
+    private bool collected = false;
 
     void OnTriggerEnter(Collider other)
     {
@@ -10,12 +11,27 @@ public class GoldCollectable : MonoBehaviour
         if(collect != null)
         {
             collect.CollectGold(amount);
+            collected = true;
             Despawn();
         }
     }
 
     void Despawn()
     {
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+    }
+
+    public override bool GetFlag()
+    {
+        return collected;
+    }
+
+    public override void ApplyFlag(bool value)
+    {
+        collected = value;
+        if (collected)
+        {
+            Destroy(gameObject);
+        }
     }
 }

@@ -34,7 +34,8 @@ public class PauseService : MonoBehaviour, IPauseService
 
     private void Awake()
     {
-        // TODO: Need to implement Singleton class inheritance.
+        if (Services.PauseService != null) return;
+
         Services.PauseService = this;
     }
 
