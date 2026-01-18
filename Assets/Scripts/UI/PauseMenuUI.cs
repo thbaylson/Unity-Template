@@ -49,8 +49,7 @@ public class PauseMenuUI : MonoBehaviour
 
     public void Save()
     {
-        // TODO: Implement save functionality.
-
+        Services.SaveService?.SaveGame();
         Services.PauseService?.SetPaused(false);
     }
 
