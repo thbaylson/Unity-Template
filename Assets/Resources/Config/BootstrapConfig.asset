@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bootstrapSceneName: Bootstrap
   persistentManagers:
+  - key: SaveService
+    prefab: {fileID: 2812533698993948745, guid: db5b5ddbc9b4e5142a3ad252dfe3a9c4, type: 3}
   - key: UI
     prefab: {fileID: 6729379069854445528, guid: d2531ba1c5b2846439e64f7e3238f4e5, type: 3}
   - key: PauseService
