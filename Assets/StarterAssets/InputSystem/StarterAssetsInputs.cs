@@ -12,8 +12,9 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
+		public bool action3Trigger;
 
-		[Header("Movement Settings")]
+        [Header("Movement Settings")]
 		public bool analogMovement;
 
 		[Header("Mouse Cursor Settings")]
@@ -77,6 +78,11 @@ namespace StarterAssets
 			if(!value.isPressed) return;
             PauseInput();
         }
+
+		public void OnAction3(InputValue value)
+		{
+            Action3(value.isPressed);
+        }
 #endif
 
 
@@ -103,6 +109,11 @@ namespace StarterAssets
 		public void PauseInput()
 		{
             Services.PauseService?.Toggle();
+        }
+
+		public void Action3(bool newTriggerState)
+		{
+			action3Trigger = newTriggerState;
         }
 	}
 }
