@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ec44576b6980b9b4091efb5abd85cbf9
+guid: 599280230a65e3a41a7728cd49b9bc62
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: sitting idle
+      name: guitar playing
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 326
+      lastFrame: 229
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

@@ -79,6 +79,8 @@ GameObject:
   - component: {fileID: 2318328757937071523}
   - component: {fileID: 6889324195323694858}
   - component: {fileID: 9148696170020766897}
+  - component: {fileID: 9195044632555313814}
+  - component: {fileID: 4204806421881603675}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -330,6 +332,38 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &9195044632555313814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541478840189057051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de772f5457d4d3544abb96bd983a8d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  emoteLayerIndex: 1
+  emoteStateName: Emote
+  placeholderClip: {fileID: -203655887218126122, guid: ec44576b6980b9b4091efb5abd85cbf9, type: 3}
+  up: {fileID: 11400000, guid: 5eb31f03fa3f2d04083203a0aafcd152, type: 2}
+  down: {fileID: 11400000, guid: 95da824d254c5254d81d7a31358b96a4, type: 2}
+  left: {fileID: 11400000, guid: be229836f81841e4db5949c7170cffb2, type: 2}
+  right: {fileID: 11400000, guid: 3af3234dd03390e43a6c3796b2b0123d, type: 2}
+--- !u!114 &4204806421881603675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 541478840189057051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b68e39a1a35b8c1408880559293b2dab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  emoteController: {fileID: 9195044632555313814}
 --- !u!1 &626039645080804190
 GameObject:
   m_ObjectHideFlags: 0

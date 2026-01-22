@@ -12,7 +12,7 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
-		public bool action3Trigger;
+		//public bool actionTrigger;
 
         [Header("Movement Settings")]
 		public bool analogMovement;
@@ -79,10 +79,10 @@ namespace StarterAssets
             PauseInput();
         }
 
-		public void OnAction3(InputValue value)
-		{
-            Action3(value.isPressed);
-        }
+		//public void OnAction(InputValue value)
+		//{
+  //          Action(value.isPressed);
+  //      }
 #endif
 
 
@@ -111,9 +111,9 @@ namespace StarterAssets
             Services.PauseService?.Toggle();
         }
 
-		public void Action3(bool newTriggerState)
-		{
-			action3Trigger = newTriggerState;
-        }
+		//public void Action(bool newTriggerState)
+		//{
+		//	actionTrigger = newTriggerState;
+  //      }
 	}
 }

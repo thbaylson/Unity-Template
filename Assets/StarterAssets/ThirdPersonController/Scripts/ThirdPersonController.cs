@@ -39,6 +39,8 @@ namespace StarterAssets
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
         public float Gravity = -15.0f;
 
+        public float CurrentSpeed => _speed;
+
         [Space(10)]
         [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
         public float JumpTimeout = 0.50f;
@@ -97,7 +99,7 @@ namespace StarterAssets
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
-        private int _animIDAction3;
+        //private int _animIDAction;
 
 #if ENABLE_INPUT_SYSTEM 
         private PlayerInput _playerInput;
@@ -161,7 +163,7 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
-            Actions();
+            //Actions();
             Move();
         }
 
@@ -177,7 +179,7 @@ namespace StarterAssets
             _animIDJump = Animator.StringToHash("Jump");
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
-            _animIDAction3 = Animator.StringToHash("Action3");
+            //_animIDAction = Animator.StringToHash("Action");
         }
 
         private void GroundedCheck()
@@ -353,20 +355,20 @@ namespace StarterAssets
             }
         }
 
-        private void Actions()
-        {
-            if (!Grounded || _input.move != Vector2.zero || _speed != 0f)
-            {
-                _input.action3Trigger = false;
-                return;
-            }
+        //private void Actions()
+        //{
+        //    if (!Grounded || _input.move != Vector2.zero || _speed != 0f)
+        //    {
+        //        _input.actionTrigger = false;
+        //        return;
+        //    }
 
-            if (_hasAnimator)
-            {
-                _animator.SetBool(_animIDAction3, _input.action3Trigger);
-                _input.action3Trigger = false;
-            }
-        }
+        //    if (_hasAnimator)
+        //    {
+        //        _animator.SetBool(_animIDAction, _input.actionTrigger);
+        //        _input.actionTrigger = false;
+        //    }
+        //}
 
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {

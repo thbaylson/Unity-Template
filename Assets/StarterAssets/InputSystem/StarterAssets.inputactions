@@ -52,9 +52,36 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Action3",
+                    "name": "EmoteUp",
                     "type": "Button",
                     "id": "ecaea417-b107-4209-8132-f43e09822c95",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EmoteDown",
+                    "type": "Button",
+                    "id": "8315e0da-fda0-4842-a422-1320c804c996",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EmoteRight",
+                    "type": "Button",
+                    "id": "0487b67d-0d4b-4bb8-b27c-fabca88896c9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EmoteLeft",
+                    "type": "Button",
+                    "id": "53e06cfe-f5b2-49ca-a9a2-f93c82a5d3b5",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -263,22 +290,88 @@
                 {
                     "name": "",
                     "id": "8ecde905-1059-48d6-8127-4690f0d04bf2",
-                    "path": "<Gamepad>/dpad/down",
+                    "path": "<Gamepad>/dpad/up",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "Action3",
+                    "action": "EmoteUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "bde43764-e77f-46b0-813e-c60153e6aa0b",
+                    "path": "<Keyboard>/numpad8",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "EmoteUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c6d2c8af-66da-4ad9-ab4e-7ac0ea347e03",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "EmoteDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6cd1cda9-bfa2-4312-831c-401a06c4ad80",
                     "path": "<Keyboard>/numpad2",
                     "interactions": "",
                     "processors": "",
                     "groups": ";KeyboardMouse",
-                    "action": "Action3",
+                    "action": "EmoteDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ef89775b-4ce3-4519-afaf-69fa0625a49f",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "EmoteRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b22f74a2-41d3-4b08-8223-b8b3d6940adb",
+                    "path": "<Keyboard>/numpad6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "EmoteRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "632b2153-eb67-4f03-96cd-d8bf20f8f052",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "EmoteLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "570258ad-2e6b-4efd-ad25-7ab7edc44b5f",
+                    "path": "<Keyboard>/numpad4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";KeyboardMouse",
+                    "action": "EmoteLeft",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
