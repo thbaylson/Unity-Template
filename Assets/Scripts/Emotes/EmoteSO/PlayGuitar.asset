@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13926c2bc33db5744b6b2dcc438e38f2, type: 3}
   m_Name: PlayGuitar
   m_EditorClassIdentifier: 
-  DisplayName: Play Guitar
   Clip: {fileID: -203655887218126122, guid: 599280230a65e3a41a7728cd49b9bc62, type: 3}
+  DisplayName: Play Guitar
+  IsLooping: 1

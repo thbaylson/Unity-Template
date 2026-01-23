@@ -1,4 +1,5 @@
 using StarterAssets;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace Template.Emotes
     public class EmoteController : MonoBehaviour
     {
         [Header("Animator")]
+        [SerializeField] private int baseLayerIndex = 0;
         [SerializeField] private int emoteLayerIndex = 1;
         [SerializeField] private string emoteStateName = "Emote";
 
@@ -24,8 +26,10 @@ namespace Template.Emotes
         private ThirdPersonController thirdPersonController;
         private StarterAssetsInputs inputs;
 
-        private AnimatorOverrideController _overrideController;
-        private int _emoteStateHash;
+        private AnimatorOverrideController overrideController;
+        private int emoteStateHash;
+
+        private Coroutine playAnimOnceRoutine;
 
         private void Awake()
         {
@@ -33,18 +37,30 @@ namespace Template.Emotes
             thirdPersonController = GetComponent<ThirdPersonController>();
             inputs = GetComponent<StarterAssetsInputs>();
 
-            _emoteStateHash = Animator.StringToHash(emoteStateName);
+            emoteStateHash = Animator.StringToHash(emoteStateName);
 
             // Ensure we have an override controller to swap the placeholder clip.
             if (animator.runtimeAnimatorController is AnimatorOverrideController existing)
             {
-                _overrideController = existing;
+                overrideController = existing;
             }
             else
             {
-                _overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-                animator.runtimeAnimatorController = _overrideController;
+                overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+                animator.runtimeAnimatorController = overrideController;
             }
+        }
+
+        private void OnEnable()
+        {
+            ThirdPersonController.OnPlayerMoved += CancelAnimation;
+            ThirdPersonController.OnPlayerJumped += CancelAnimation;
+        }
+
+        private void OnDisable()
+        {
+            ThirdPersonController.OnPlayerMoved -= CancelAnimation;
+            ThirdPersonController.OnPlayerJumped -= CancelAnimation;
         }
 
         public void SetBinding(EmoteSlot slot, EmoteDefinition emote)
@@ -109,10 +125,38 @@ namespace Template.Emotes
         private void Play(EmoteDefinition emote)
         {
             // Override the one clip used by the Emote state.
-            _overrideController[placeholderClip] = emote.Clip;
+            overrideController[placeholderClip] = emote.Clip;
 
+            animator.SetLayerWeight(baseLayerIndex, 0f);
             animator.SetLayerWeight(emoteLayerIndex, 1f);
-            animator.Play(_emoteStateHash, emoteLayerIndex, 0f);
+            animator.Play(emoteStateHash, emoteLayerIndex, 0f);
+
+            if(!emote.IsLooping)
+            {
+                playAnimOnceRoutine = StartCoroutine(PlayOnceRoutine(emote));
+            }
+        }
+
+
+        private IEnumerator PlayOnceRoutine(EmoteDefinition emote)
+        {
+            var duration = emote.Clip.length;
+            if (duration > 0f)
+                yield return new WaitForSeconds(duration);
+
+            CancelAnimation();
+        }
+
+        private void CancelAnimation()
+        {
+            if (playAnimOnceRoutine != null)
+            {
+                StopCoroutine(playAnimOnceRoutine);
+                playAnimOnceRoutine = null;
+            }
+
+            animator.SetLayerWeight(emoteLayerIndex, 0f);
+            animator.SetLayerWeight(baseLayerIndex, 1f);
         }
     }
 }

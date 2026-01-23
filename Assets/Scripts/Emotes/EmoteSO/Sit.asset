@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13926c2bc33db5744b6b2dcc438e38f2, type: 3}
   m_Name: Sit
   m_EditorClassIdentifier: 
-  DisplayName: Sit
   Clip: {fileID: -203655887218126122, guid: ec44576b6980b9b4091efb5abd85cbf9, type: 3}
+  DisplayName: Sit
+  IsLooping: 1
