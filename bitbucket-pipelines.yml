@@ -1,0 +1,79 @@
+image: unityci/editor:6000.0.61f1-webgl-3.2.1
+
+options:
+  max-time: 120
+
+definitions:
+  caches:
+    # Cache Unity PackageCache keyed by dependency files and editor version
+    unity-packages:
+      key:
+        files:
+          - Packages/manifest.json
+          - Packages/packages-lock.json
+          - ProjectSettings/ProjectVersion.txt
+      path: Library/PackageCache
+
+    # Cache Bee (Unity’s build system outputs)
+    bee:
+      key:
+        files:
+          - ProjectSettings/ProjectVersion.txt
+      path: Library/Bee
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Build WebGL
+          caches:
+            - unity-packages
+            - bee
+          script:
+            # 1) Install license inside container
+            - mkdir -p ~/.local/share/unity3d/Unity
+            - echo "$UNITY_LICENSE" | tr -d '\r' > ~/.local/share/unity3d/Unity/Unity_lic.ulf
+
+            # 2) Sanity check the editor version
+            - unity-editor -version
+
+            # 3) Batch build
+            - unity-editor \
+                -batchmode -nographics -logFile /dev/stdout \
+                -projectPath "$BITBUCKET_CLONE_DIR" \
+                -buildTarget WebGL \
+                -executeMethod CI.Build.WebGL \
+                -quit
+
+          artifacts:
+            - Build/WebGL/**
+
+  pull-requests:
+    "**":
+      - step:
+          name: PR verification
+          caches:
+            - unity-packages
+            - bee
+          script:
+            # License
+            - mkdir -p ~/.local/share/unity3d/Unity
+            - echo "$UNITY_LICENSE" | tr -d '\r' > ~/.local/share/unity3d/Unity/Unity_lic.ulf
+
+            # Only check for PRs targeting develop
+            - |
+              if [ "$BITBUCKET_PR_DESTINATION_BRANCH" != "develop" ]; then
+                echo "Skipping verification build (PR destination is '$BITBUCKET_PR_DESTINATION_BRANCH', not 'develop')."
+                exit 0
+              fi
+
+            # Build
+            - unity-editor \
+                -batchmode -nographics -logFile /dev/stdout \
+                -projectPath "$BITBUCKET_CLONE_DIR" \
+                -buildTarget WebGL \
+                -executeMethod CI.Build.WebGL \
+                -quit
+          artifacts:
+            - Build/WebGL/**
+            - test-results.xml
