@@ -1,28 +1,66 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# UBA artifact path (Unity support references UNITY_PLAYER_PATH in post-build scripts)
-PLAYER_PATH="${UNITY_PLAYER_PATH:-}"
-if [[ -z "$PLAYER_PATH" ]]; then
-  echo "UNITY_PLAYER_PATH is empty; cannot locate build artifact."
+# Required env vars
+: "${BUTLER_API_KEY:?Missing BUTLER_API_KEY}"
+: "${ITCH_TARGET:?Missing ITCH_TARGET (e.g. username/game)}"
+: "${ITCH_CHANNEL:?Missing ITCH_CHANNEL (e.g. html5)}"
+
+# Artifact path from UBA
+ARTIFACT_PATH="${UNITY_PLAYER_PATH:-${3:-}}"
+if [[ -z "$ARTIFACT_PATH" ]]; then
+  echo "ERROR: No artifact path (UNITY_PLAYER_PATH empty and arg #3 missing)."
   exit 1
 fi
 
-# If the artifact is a directory, ensure it contains index.html (itch HTML5 entry point)
-if [[ -d "$PLAYER_PATH" ]]; then
-  if [[ ! -f "$PLAYER_PATH/index.html" ]]; then
-    echo "No index.html found at: $PLAYER_PATH"
-    exit 1
+echo "BUILDER_OS=${BUILDER_OS:-unknown}"
+echo "UNITY_PLAYER_PATH=${UNITY_PLAYER_PATH:-}"
+echo "Artifact path (raw)=$ARTIFACT_PATH"
+
+# Choose correct butler platform for broth
+BUTLER_PLATFORM="linux-amd64"
+if [[ "${BUILDER_OS:-}" == "WINDOWS" ]]; then
+  BUTLER_PLATFORM="windows-amd64"
+elif [[ "${BUILDER_OS:-}" == "MAC" ]]; then
+  # If you ever switch to a macOS builder:
+  if [[ "$(uname -m 2>/dev/null || echo amd64)" == "arm64" ]]; then
+    BUTLER_PLATFORM="darwin-arm64"
+  else
+    BUTLER_PLATFORM="darwin-amd64"
   fi
 fi
 
-# Download butler (automation-friendly, stable URL)
-curl -L -o butler.zip "https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default"
-unzip -o butler.zip -d butler_bin
-chmod +x butler_bin/butler*
+echo "Downloading butler platform: $BUTLER_PLATFORM"
+curl -L -o butler.zip "https://broth.itch.zone/butler/${BUTLER_PLATFORM}/LATEST/archive/default"
 
-# Push (butler accepts a directory or a .zip)
-TARGET="${ITCH_TARGET:?Missing ITCH_TARGET}"
-CHANNEL="${ITCH_CHANNEL:?Missing ITCH_CHANNEL}"
+# Extract 
+PYTHON_BIN="python3"
+command -v "$PYTHON_BIN" >/dev/null 2>&1 || PYTHON_BIN="python"
+command -v "$PYTHON_BIN" >/dev/null 2>&1 || { echo "ERROR: python is required to extract butler.zip"; exit 1; }
 
-butler_bin/butler push "$PLAYER_PATH" "${TARGET}:${CHANNEL}"
+"$PYTHON_BIN" - <<'PY'
+import zipfile, os
+os.makedirs("butler_bin", exist_ok=True)
+with zipfile.ZipFile("butler.zip", "r") as z:
+    z.extractall("butler_bin")
+PY
+
+# Find the butler executable
+if [[ "${BUILDER_OS:-}" == "WINDOWS" ]]; then
+  BUTLER="$(find butler_bin -maxdepth 2 -type f -iname 'butler*.exe' | head -n 1)"
+else
+  BUTLER="$(find butler_bin -maxdepth 2 -type f -iname 'butler*' | head -n 1)"
+fi
+if [[ -z "$BUTLER" ]]; then
+  echo "ERROR: could not find butler after extraction"
+  exit 1
+fi
+chmod +x "$BUTLER" || true
+
+# Convert artifact path for Windows native executable
+PUSH_PATH="$ARTIFACT_PATH"
+if [[ "${BUILDER_OS:-}" == "WINDOWS" ]]; then
+  PUSH_PATH="$(cygpath -wa "$ARTIFACT_PATH")"
+fi
+
+"$BUTLER" push "$PUSH_PATH" "${ITCH_TARGET}:${ITCH_CHANNEL}"
