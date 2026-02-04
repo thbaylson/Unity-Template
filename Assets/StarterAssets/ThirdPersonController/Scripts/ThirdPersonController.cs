@@ -1,4 +1,5 @@
-﻿ using UnityEngine;
+﻿using System;
+using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -14,6 +15,9 @@ namespace StarterAssets
 #endif
     public class ThirdPersonController : MonoBehaviour
     {
+        public static Action OnPlayerMoved;
+        public static Action OnPlayerJumped;
+
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 2.0f;
@@ -38,6 +42,8 @@ namespace StarterAssets
 
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
         public float Gravity = -15.0f;
+
+        public float CurrentSpeed => _speed;
 
         [Space(10)]
         [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
@@ -97,6 +103,7 @@ namespace StarterAssets
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
+        //private int _animIDAction;
 
 #if ENABLE_INPUT_SYSTEM 
         private PlayerInput _playerInput;
@@ -160,6 +167,7 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
+            //Actions();
             Move();
         }
 
@@ -175,6 +183,7 @@ namespace StarterAssets
             _animIDJump = Animator.StringToHash("Jump");
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+            //_animIDAction = Animator.StringToHash("Action");
         }
 
         private void GroundedCheck()
@@ -257,6 +266,8 @@ namespace StarterAssets
             // if there is a move input rotate player when the player is moving
             if (_input.move != Vector2.zero)
             {
+                OnPlayerMoved?.Invoke();
+
                 _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
                                   _mainCamera.transform.eulerAngles.y;
                 float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
@@ -304,6 +315,8 @@ namespace StarterAssets
                 // Jump
                 if (_input.jump && _jumpTimeoutDelta <= 0.0f)
                 {
+                    OnPlayerJumped?.Invoke();
+
                     // the square root of H * -2 * G = how much velocity needed to reach desired height
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
 
@@ -350,6 +363,21 @@ namespace StarterAssets
             }
         }
 
+        //private void Actions()
+        //{
+        //    if (!Grounded || _input.move != Vector2.zero || _speed != 0f)
+        //    {
+        //        _input.actionTrigger = false;
+        //        return;
+        //    }
+
+        //    if (_hasAnimator)
+        //    {
+        //        _animator.SetBool(_animIDAction, _input.actionTrigger);
+        //        _input.actionTrigger = false;
+        //    }
+        //}
+
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {
             if (lfAngle < -360f) lfAngle += 360f;
@@ -377,7 +405,7 @@ namespace StarterAssets
             {
                 if (FootstepAudioClips.Length > 0)
                 {
-                    var index = Random.Range(0, FootstepAudioClips.Length);
+                    var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
                     AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
                 }
             }
