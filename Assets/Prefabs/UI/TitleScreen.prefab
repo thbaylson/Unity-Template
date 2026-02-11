@@ -533,7 +533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e83f6ae145d51e4a82387d698fe71e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firstGameplayScene: SmallScene
+  firstGameplayScene: FlatScene
   newGameButton: {fileID: 1627901937374192053}
   loadGameButton: {fileID: 5382464880167158300}
   quitGameButton: {fileID: 1999350568071547219}
