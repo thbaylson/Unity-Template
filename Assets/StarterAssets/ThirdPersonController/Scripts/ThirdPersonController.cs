@@ -167,7 +167,6 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
-            //Actions();
             Move();
         }
 
@@ -362,21 +361,6 @@ namespace StarterAssets
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
         }
-
-        //private void Actions()
-        //{
-        //    if (!Grounded || _input.move != Vector2.zero || _speed != 0f)
-        //    {
-        //        _input.actionTrigger = false;
-        //        return;
-        //    }
-
-        //    if (_hasAnimator)
-        //    {
-        //        _animator.SetBool(_animIDAction, _input.actionTrigger);
-        //        _input.actionTrigger = false;
-        //    }
-        //}
 
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {

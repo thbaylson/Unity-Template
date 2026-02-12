@@ -29,7 +29,6 @@ public class BootstrapConfig : ScriptableObject
 [Serializable]
 public class ManagerPrefabEntry
 {
-    public string key;
     public GameObject prefab;
 }
 

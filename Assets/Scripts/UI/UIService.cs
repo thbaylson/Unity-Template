@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+public class UIService : MonoBehaviour
 {
-    public static UIManager Instance { get; private set; }
+    public static UIService Instance { get; private set; }
     [SerializeField] private RectTransform hudLayer;
     [SerializeField] private RectTransform screenLayer;
     [SerializeField] private RectTransform popupLayer;

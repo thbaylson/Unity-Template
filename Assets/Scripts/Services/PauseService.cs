@@ -27,9 +27,9 @@ public class PauseService : MonoBehaviour, IPauseService
     private PlayerInput playerInput;
     private PauseMenuUI menuUI;
 
-    /// The reason we assign this input action here instead of setting it up in 
-    /// StarterAssetsInputs is because EventSystem was consuming the Close input 
-    /// before it ever got to StarterAssetsInputs. Thus, we subscribe to the EventSystem itself instead.
+    /// The reason we assign this input action here instead of setting it up in StarterAssetsInputs is because 
+    /// EventSystem was consuming the Close input before it ever got to StarterAssetsInputs. Thus, we subscribe 
+    /// directly to the UI Input System's cancel action.
     private InputAction _cancelAction;
 
     private void Awake()
