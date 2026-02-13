@@ -1,17 +1,17 @@
 using UnityEngine;
 
-public class LevelTransition : MonoBehaviour
+namespace Template.TransitionByName
 {
-    // Extremely naive implementation for testing purposes.
-    private void OnTriggerEnter(Collider other)
+    // Simple implementation for testing purposes.
+    public class LevelTransition : MonoBehaviour
     {
-        int currentLevel = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
-        int totalLevels = UnityEngine.SceneManagement.SceneManager.sceneCountInBuildSettings;
-        int nextLevel = (currentLevel + 1) % totalLevels;
+        [SerializeField] private string nextLevelName;
+        [SerializeField] private Vector3 nextLevelPosition;
 
-        // Level index 0 is the title screen, index 1 is the bootstrapper scene.
-        nextLevel = nextLevel < 2 ? 2 : nextLevel;
-
-        UnityEngine.SceneManagement.SceneManager.LoadScene(nextLevel);
+        private void OnTriggerEnter(Collider other)
+        {
+            PlayerManager.Instance?.SetPlayerPosition(nextLevelPosition);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(nextLevelName);
+        }
     }
 }

@@ -4,11 +4,15 @@ using UnityEngine.EventSystems;
 
 public class TitleScreenManager : MonoBehaviour
 {
-    [SerializeField] private string firstGameplayScene = "SmallScene";
+    [SerializeField] private string firstGameplayScene = "FlatScene";
+
+    [Header("Container")]
+    [SerializeField] private GameObject buttonContainer;
 
     [Header("Buttons")]
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button loadGameButton;
+    [SerializeField] private Button settingsButton;
     [SerializeField] private Button quitGameButton;
 
     private void Awake()
@@ -16,13 +20,13 @@ public class TitleScreenManager : MonoBehaviour
         // Bind buttons.
         if (newGameButton) newGameButton.onClick.AddListener(OnNewGame);
         if (loadGameButton) loadGameButton.onClick.AddListener(OnLoadGame);
+        if (settingsButton) settingsButton.onClick.AddListener(OnSettings);
         if (quitGameButton) quitGameButton.onClick.AddListener(OnQuit);
     }
 
     private void OnEnable()
     {
-        RefreshButtonVisibility();
-        EnsureValidSelection();
+        HandleFocusReturned();
     }
 
     private void RefreshButtonVisibility()
@@ -53,6 +57,23 @@ public class TitleScreenManager : MonoBehaviour
     {
         Services.SaveService.LoadGame();
         UnityEngine.SceneManagement.SceneManager.LoadScene(firstGameplayScene);
+    }
+
+    private void OnSettings()
+    {
+        UIService.Instance.ShowSettings(onBack: HandleFocusReturned);
+        buttonContainer.SetActive(false);
+    }
+
+    private void HandleFocusReturned()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        buttonContainer.SetActive(true);
+
+        RefreshButtonVisibility();
+        EnsureValidSelection();
     }
 
     private void OnQuit()

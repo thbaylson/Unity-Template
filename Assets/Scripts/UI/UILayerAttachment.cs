@@ -15,9 +15,9 @@ public class UILayerAttachment : MonoBehaviour
 
     public void AttachToLayer()
     {
-        if (UIManager.Instance != null)
+        if (UIService.Instance != null)
         {
-            UIManager.Instance.AttachToLayer(transform, layer);
+            UIService.Instance.AttachToLayer(transform, layer);
             isAttached = true;
         }
         else

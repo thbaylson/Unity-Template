@@ -168,7 +168,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveSpeed: 5
   SprintSpeed: 8
-  RotationSmoothTime: 0.12
+  RotationSmoothTime: 0.057
   SpeedChangeRate: 10
   LandingAudioClip: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   FootstepAudioClips:
@@ -344,6 +344,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de772f5457d4d3544abb96bd983a8d22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baseLayerIndex: 0
   emoteLayerIndex: 1
   emoteStateName: Emote
   placeholderClip: {fileID: -203655887218126122, guid: ec44576b6980b9b4091efb5abd85cbf9, type: 3}
