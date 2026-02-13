@@ -6,12 +6,15 @@ using UnityEngine.SceneManagement;
 
 public interface IAudioService
 {
+    float MasterVolumeNormalized { get; }
     float MusicVolumeNormalized { get; }
     float SfxVolumeNormalized { get; }
 
+    event Action<float> MasterVolumeChanged;
     event Action<float> MusicVolumeChanged;
     event Action<float> SfxVolumeChanged;
 
+    void SetMasterVolume(float normalized01);
     void SetMusicVolume(float normalized01);
     void SetSfxVolume(float normalized01);
 
@@ -33,11 +36,16 @@ public interface IAudioService
 /// </summary>
 public class AudioService : MonoBehaviour, IAudioService
 {
+    private const string MasterVolKey = "audio.masterVolume";
+    private const string MusicVolKey = "audio.musicVolume";
+    private const string SfxVolKey = "audio.sfxVolume";
+
     private const float MinDb = -80f;
     private const float MaxDb = 0f;
 
     [Header("Mixer")]
     [SerializeField] private AudioMixer audioMixer;
+    [SerializeField] private string masterVolumeParameter = "MasterVolume";
     [SerializeField] private string musicVolumeParameter = "MusicVolume";
     [SerializeField] private string sfxVolumeParameter = "SfxVolume";
 
@@ -55,9 +63,11 @@ public class AudioService : MonoBehaviour, IAudioService
     [Header("3D SFX")]
     [SerializeField, Min(1)] private int sfx3dPoolSize = 8;
 
+    public float MasterVolumeNormalized { get; private set; } = 1f;
     public float MusicVolumeNormalized { get; private set; } = 1f;
     public float SfxVolumeNormalized { get; private set; } = 1f;
 
+    public event Action<float> MasterVolumeChanged;
     public event Action<float> MusicVolumeChanged;
     public event Action<float> SfxVolumeChanged;
 
@@ -89,8 +99,6 @@ public class AudioService : MonoBehaviour, IAudioService
         CreateMusicSources();
         CreateSfxPool();
         CreateSfx3dPool();
-        LoadVolumes();
-        ApplyMixerVolumes();
     }
 
     private void OnEnable()
@@ -106,6 +114,8 @@ public class AudioService : MonoBehaviour, IAudioService
     private void Start()
     {
         ApplySceneMusic(SceneManager.GetActiveScene());
+        LoadVolumes();
+        ApplyMixerVolumes();
     }
 
     private void CreateMusicSources()
@@ -333,6 +343,16 @@ public class AudioService : MonoBehaviour, IAudioService
         src.PlayOneShot(clip, Mathf.Clamp01(volumeScale));
     }
 
+    public void SetMasterVolume(float normalized01)
+    {
+        MasterVolumeNormalized = Mathf.Clamp01(normalized01);
+        ApplyMixerVolumes();
+
+        MasterVolumeChanged?.Invoke(MasterVolumeNormalized);
+
+        SaveVolumes();
+    }
+
     public void SetMusicVolume(float normalized01)
     {
         MusicVolumeNormalized = Mathf.Clamp01(normalized01);
@@ -355,18 +375,24 @@ public class AudioService : MonoBehaviour, IAudioService
 
     private void LoadVolumes()
     {
-        // TODO: Implement later.
+        MasterVolumeNormalized = Mathf.Clamp01(PlayerPrefs.GetFloat(MasterVolKey, 1f));
+        MusicVolumeNormalized = Mathf.Clamp01(PlayerPrefs.GetFloat(MusicVolKey, 1f));
+        SfxVolumeNormalized = Mathf.Clamp01(PlayerPrefs.GetFloat(SfxVolKey, 1f));
     }
 
     private void SaveVolumes()
     {
-        // TODO: Implement later.
+        PlayerPrefs.SetFloat(MasterVolKey, MasterVolumeNormalized);
+        PlayerPrefs.SetFloat(MusicVolKey, MusicVolumeNormalized);
+        PlayerPrefs.SetFloat(SfxVolKey, SfxVolumeNormalized);
+        PlayerPrefs.Save();
     }
 
     private void ApplyMixerVolumes()
     {
         if (audioMixer == null) return;
 
+        audioMixer.SetFloat(masterVolumeParameter, NormalizedToDb(MasterVolumeNormalized));
         audioMixer.SetFloat(musicVolumeParameter, NormalizedToDb(MusicVolumeNormalized));
         audioMixer.SetFloat(sfxVolumeParameter, NormalizedToDb(SfxVolumeNormalized));
     }

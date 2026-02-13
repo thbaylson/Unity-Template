@@ -162,6 +162,9 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+
+            // Lock the cursor when the player becomes active
+            Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void Update()

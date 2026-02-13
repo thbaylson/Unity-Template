@@ -14,6 +14,7 @@ public interface IPauseService
 
     void Toggle();
     void SetPaused(bool paused);
+    public void SetUIFocus(bool isFocused);
 }
 
 public class PauseService : MonoBehaviour, IPauseService
@@ -41,12 +42,7 @@ public class PauseService : MonoBehaviour, IPauseService
 
     private void OnEnable()
     {
-        var uiModule = EventSystem.current?.GetComponent<InputSystemUIInputModule>();
-        if (uiModule != null && uiModule.cancel != null)
-        {
-            _cancelAction = uiModule.cancel.action;
-            _cancelAction.performed += OnCancelPerformed;
-        }
+        SetUIFocus(true);
     }
 
     public void RegisterPlayerInput(PlayerInput playerInput)
@@ -77,6 +73,29 @@ public class PauseService : MonoBehaviour, IPauseService
         menuUI?.SetVisible(paused);
 
         PausedChanged?.Invoke(paused);
+    }
+
+    // This is an attempt to fix the issue of cancelling the pause menu while inside the settings menu, thus letting 
+    // the player move around while the settings menu is still open.
+    public void SetUIFocus(bool isFocused)
+    {
+        if (isFocused)
+        {
+            var uiModule = EventSystem.current?.GetComponent<InputSystemUIInputModule>();
+            if (uiModule != null && uiModule.cancel != null)
+            {
+                _cancelAction = uiModule.cancel.action;
+                _cancelAction.performed += OnCancelPerformed;
+            }
+        }
+        else
+        {
+            if (_cancelAction != null)
+            {
+                _cancelAction.performed -= OnCancelPerformed;
+                _cancelAction = null;
+            }
+        }
     }
 
     private void OnCancelPerformed(InputAction.CallbackContext ctx)

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class UIService : MonoBehaviour
@@ -6,6 +7,9 @@ public class UIService : MonoBehaviour
     [SerializeField] private RectTransform hudLayer;
     [SerializeField] private RectTransform screenLayer;
     [SerializeField] private RectTransform popupLayer;
+
+    [SerializeField] private SettingsPopup settingsPopup;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -39,6 +43,14 @@ public class UIService : MonoBehaviour
         }
 
         t.SetParent(parent, false);
+    }
+
+    public void ShowSettings(Action onBack)
+    {
+        if (settingsPopup != null)
+        {
+            settingsPopup.Open(onBack);
+        }
     }
 }
 
