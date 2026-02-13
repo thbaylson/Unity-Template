@@ -58,12 +58,12 @@ public class Bootstrapper : MonoBehaviour
 
         foreach (var entry in config.persistentManagers)
         {
-            if (entry == null || entry.prefab == null || string.IsNullOrEmpty(entry.key)) continue;
-            if (_persistentInstances.ContainsKey(entry.key)) continue;
+            if (entry == null || entry.prefab == null || string.IsNullOrEmpty(entry.prefab.name)) continue;
+            if (_persistentInstances.ContainsKey(entry.prefab.name)) continue;
 
             var instance = Instantiate(entry.prefab, transform);
             instance.name = entry.prefab.name;
-            _persistentInstances.Add(entry.key, instance);
+            _persistentInstances.Add(entry.prefab.name, instance);
         }
     }
 

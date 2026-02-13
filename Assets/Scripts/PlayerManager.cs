@@ -42,10 +42,6 @@ public class PlayerManager : MonoBehaviour
 
             DontDestroyOnLoad(playerContainer);
         }
-        else
-        {
-            // TODO: Error logging
-        }
     }
 
     private void OnDisable()

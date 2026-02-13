@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Template.TransitionByName
 {
-    // Extremely naive implementation for testing purposes.
+    // Simple implementation for testing purposes.
     public class LevelTransition : MonoBehaviour
     {
         [SerializeField] private string nextLevelName;

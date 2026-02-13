@@ -32,6 +32,9 @@ namespace StarterAssets
         [Tooltip("Acceleration and deceleration")]
         public float SpeedChangeRate = 10.0f;
 
+        /// <HERE>
+        /// // TODO: Implement AudioService
+        /// </HERE>
         public AudioClip LandingAudioClip;
         public AudioClip[] FootstepAudioClips;
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
@@ -159,6 +162,9 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+
+            // Lock the cursor when the player becomes active
+            Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void Update()
@@ -167,7 +173,6 @@ namespace StarterAssets
 
             JumpAndGravity();
             GroundedCheck();
-            //Actions();
             Move();
         }
 
@@ -363,21 +368,6 @@ namespace StarterAssets
             }
         }
 
-        //private void Actions()
-        //{
-        //    if (!Grounded || _input.move != Vector2.zero || _speed != 0f)
-        //    {
-        //        _input.actionTrigger = false;
-        //        return;
-        //    }
-
-        //    if (_hasAnimator)
-        //    {
-        //        _animator.SetBool(_animIDAction, _input.actionTrigger);
-        //        _input.actionTrigger = false;
-        //    }
-        //}
-
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {
             if (lfAngle < -360f) lfAngle += 360f;
@@ -406,7 +396,9 @@ namespace StarterAssets
                 if (FootstepAudioClips.Length > 0)
                 {
                     var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
-                    AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                    var pos = transform.TransformPoint(_controller.center);
+                    float pitch = UnityEngine.Random.Range(0.95f, 1.05f);
+                    Services.AudioService?.PlaySfxAtPoint(FootstepAudioClips[index], pos, FootstepAudioVolume, pitch);
                 }
             }
         }
@@ -415,7 +407,8 @@ namespace StarterAssets
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
-                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                var pos = transform.TransformPoint(_controller.center);
+                Services.AudioService?.PlaySfxAtPoint(LandingAudioClip, pos, FootstepAudioVolume);
             }
         }
     }
