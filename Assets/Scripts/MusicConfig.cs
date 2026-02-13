@@ -4,8 +4,11 @@ public class MusicConfig : MonoBehaviour
 {
     public enum MusicMode
     {
+        // Stops the current song and plays the specified clip.
         Override,
+        // Keeps the current song playing.
         KeepCurrent,
+        // Stops the current song.
         Stop
     }
 

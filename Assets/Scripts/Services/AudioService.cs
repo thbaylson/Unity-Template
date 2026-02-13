@@ -21,8 +21,16 @@ public interface IAudioService
     void StopMusic(float fadeOutSeconds = -1f);
 
     void PlaySfx(AudioClip clip, float volumeScale = 1f, float pitch = 1f);
+    void PlaySfxAtPoint(AudioClip clip, Vector3 position, float volumeScale = 1f, float pitch = 1f, float minDistance = 1f, float maxDistance = 20f
+);
+
 }
 
+/// <summary>
+/// This service manages music and sound effects, including scene-based music management, crossfading, and volume control via an AudioMixer.
+/// On scene load, it looks for a MusicConfig component to determine what to do with the music: override to a new song, 
+/// keep the same song playing, or stop the music for the current scene.
+/// </summary>
 public class AudioService : MonoBehaviour, IAudioService
 {
     private const float MinDb = -80f;
@@ -44,6 +52,9 @@ public class AudioService : MonoBehaviour, IAudioService
     [Header("SFX")]
     [SerializeField, Min(1)] private int sfxPoolSize = 8;
 
+    [Header("3D SFX")]
+    [SerializeField, Min(1)] private int sfx3dPoolSize = 8;
+
     public float MusicVolumeNormalized { get; private set; } = 1f;
     public float SfxVolumeNormalized { get; private set; } = 1f;
 
@@ -59,6 +70,9 @@ public class AudioService : MonoBehaviour, IAudioService
 
     private List<AudioSource> _sfxPool = new List<AudioSource>();
     private int _sfxPoolIndex;
+    
+    private List<AudioSource> _sfx3dPool = new List<AudioSource>();
+    private int _sfx3dPoolIndex;
 
     private Coroutine _musicFadeRoutine;
 
@@ -74,6 +88,7 @@ public class AudioService : MonoBehaviour, IAudioService
 
         CreateMusicSources();
         CreateSfxPool();
+        CreateSfx3dPool();
         LoadVolumes();
         ApplyMixerVolumes();
     }
@@ -118,6 +133,26 @@ public class AudioService : MonoBehaviour, IAudioService
             _sfxPool.Add(src);
         }
         _sfxPoolIndex = 0;
+    }
+
+    private void CreateSfx3dPool()
+    {
+        _sfx3dPool.Clear();
+
+        for (int i = 0; i < sfx3dPoolSize; i++)
+        {
+            var src = CreateChildAudioSource($"Sfx3DSource_{i}", sfxGroup);
+            src.playOnAwake = false;
+
+            // Defaults for 3D positional one-shots
+            src.spatialBlend = 1f;
+            src.rolloffMode = AudioRolloffMode.Linear;
+            src.dopplerLevel = 0f;
+
+            _sfx3dPool.Add(src);
+        }
+
+        _sfx3dPoolIndex = 0;
     }
 
     private AudioSource CreateChildAudioSource(string name, AudioMixerGroup group)
@@ -271,6 +306,30 @@ public class AudioService : MonoBehaviour, IAudioService
         _sfxPoolIndex = (_sfxPoolIndex + 1) % _sfxPool.Count;
 
         src.pitch = Mathf.Clamp(pitch, -3f, 3f);
+        src.PlayOneShot(clip, Mathf.Clamp01(volumeScale));
+    }
+
+    public void PlaySfxAtPoint(
+        AudioClip clip,
+        Vector3 position,
+        float volumeScale = 1f,
+        float pitch = 1f,
+        float minDistance = 1f,
+        float maxDistance = 20f)
+    {
+        if (clip == null) return;
+        if (_sfx3dPool.Count == 0) return;
+
+        var src = _sfx3dPool[_sfx3dPoolIndex];
+        _sfx3dPoolIndex = (_sfx3dPoolIndex + 1) % _sfx3dPool.Count;
+
+        src.transform.position = position;
+
+        // Set per-play parameters safely (we selected a free or stolen source).
+        src.pitch = Mathf.Clamp(pitch, -3f, 3f);
+        src.minDistance = Mathf.Max(0.01f, minDistance);
+        src.maxDistance = Mathf.Max(src.minDistance, maxDistance);
+
         src.PlayOneShot(clip, Mathf.Clamp01(volumeScale));
     }
 

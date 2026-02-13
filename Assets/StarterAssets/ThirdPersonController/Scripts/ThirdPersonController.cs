@@ -32,6 +32,9 @@ namespace StarterAssets
         [Tooltip("Acceleration and deceleration")]
         public float SpeedChangeRate = 10.0f;
 
+        /// <HERE>
+        /// // TODO: Implement AudioService
+        /// </HERE>
         public AudioClip LandingAudioClip;
         public AudioClip[] FootstepAudioClips;
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
@@ -390,7 +393,9 @@ namespace StarterAssets
                 if (FootstepAudioClips.Length > 0)
                 {
                     var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
-                    AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                    var pos = transform.TransformPoint(_controller.center);
+                    float pitch = UnityEngine.Random.Range(0.95f, 1.05f);
+                    Services.AudioService?.PlaySfxAtPoint(FootstepAudioClips[index], pos, FootstepAudioVolume, pitch);
                 }
             }
         }
@@ -399,7 +404,8 @@ namespace StarterAssets
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
-                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                var pos = transform.TransformPoint(_controller.center);
+                Services.AudioService?.PlaySfxAtPoint(LandingAudioClip, pos, FootstepAudioVolume);
             }
         }
     }
