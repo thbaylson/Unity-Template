@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: BootstrapConfig
   m_EditorClassIdentifier: 
   bootstrapSceneName: Bootstrap
-  persistentManagers:
+  persistentServices:
   - prefab: {fileID: 2812533698993948745, guid: db5b5ddbc9b4e5142a3ad252dfe3a9c4, type: 3}
-  - prefab: {fileID: 286816949877644119, guid: bcc01f6b1efcaac459fddcc09e0e01aa, type: 3}
   - prefab: {fileID: 6729379069854445528, guid: d2531ba1c5b2846439e64f7e3238f4e5, type: 3}
+  - prefab: {fileID: 286816949877644119, guid: bcc01f6b1efcaac459fddcc09e0e01aa, type: 3}
   - prefab: {fileID: 147148632797817898, guid: f022a769d96c9f34ea909d0e830a97e8, type: 3}
   sceneProfiles:
   - sceneName: Title

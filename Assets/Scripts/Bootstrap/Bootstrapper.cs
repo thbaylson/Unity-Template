@@ -9,8 +9,8 @@ public class Bootstrapper : MonoBehaviour
 
     [SerializeField] private BootstrapConfig config;
 
-    // Track managers to prevent duplicate instantiations.
-    private readonly Dictionary<string, GameObject> _persistentInstances = new Dictionary<string, GameObject>();
+    // Track services/managers to prevent duplicate instantiations.
+    private readonly Dictionary<string, GameObject> _persistentServices = new Dictionary<string, GameObject>();
     private readonly Dictionary<string, GameObject> _sceneManagers = new Dictionary<string, GameObject>();
 
     private void Awake()
@@ -30,7 +30,7 @@ public class Bootstrapper : MonoBehaviour
             return;
         }
 
-        InitializePersistentManagers();
+        InitializePersistentServices();
     }
 
     private void Start()
@@ -52,18 +52,18 @@ public class Bootstrapper : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void InitializePersistentManagers()
+    private void InitializePersistentServices()
     {
-        if (config.persistentManagers == null) return;
+        if (config.persistentServices == null) return;
 
-        foreach (var entry in config.persistentManagers)
+        foreach (var entry in config.persistentServices)
         {
             if (entry == null || entry.prefab == null || string.IsNullOrEmpty(entry.prefab.name)) continue;
-            if (_persistentInstances.ContainsKey(entry.prefab.name)) continue;
+            if (_persistentServices.ContainsKey(entry.prefab.name)) continue;
 
             var instance = Instantiate(entry.prefab, transform);
             instance.name = entry.prefab.name;
-            _persistentInstances.Add(entry.prefab.name, instance);
+            _persistentServices.Add(entry.prefab.name, instance);
         }
     }
 
