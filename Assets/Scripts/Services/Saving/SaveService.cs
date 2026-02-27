@@ -40,7 +40,11 @@ public class SaveService : MonoBehaviour, ISaveService
 
         Services.SaveService = this;
 
-        _storage = new FileSaveStorage();
+#if UNITY_WEBGL && !UNITY_EDITOR
+        _storage = new WebFileSaveStorage();
+#else
+        _storage = new WindowsFileSaveStorage();
+#endif
         _serializer = new JsonSaveSerializer();
     }
 
@@ -55,6 +59,7 @@ public class SaveService : MonoBehaviour, ISaveService
     }
 
     public void MarkGameDirty() => IsGameDirty = true;
+
     public bool LoadGameExists() => _storage.Exists(gameFileName);
 
     public void LoadGame()

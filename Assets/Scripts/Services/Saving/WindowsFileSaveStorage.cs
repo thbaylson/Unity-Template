@@ -2,19 +2,14 @@ using System;
 using System.IO;
 using UnityEngine;
 
-public interface ISaveStorage
-{
-    bool Exists(string fileName);
-    byte[] ReadAllBytes(string fileName);
-    void WriteAllBytes(string fileName, byte[] bytes);
-    void Delete(string fileName);
-}
-
-public class FileSaveStorage : ISaveStorage
+/// <summary>
+/// Persists save payloads to platform filesystem paths backed by Application.persistentDataPath.
+/// </summary>
+public class WindowsFileSaveStorage : ISaveStorage
 {
     private readonly string _rootDir;
 
-    public FileSaveStorage(string rootDir = null)
+    public WindowsFileSaveStorage(string rootDir = null)
     {
         _rootDir = string.IsNullOrWhiteSpace(rootDir) ? Application.persistentDataPath : rootDir;
         Directory.CreateDirectory(_rootDir);
@@ -29,22 +24,23 @@ public class FileSaveStorage : ISaveStorage
     public void WriteAllBytes(string fileName, byte[] bytes)
     {
         var path = PathFor(fileName);
-        var tmp = path + ".tmp";
+        var tempPath = path + ".tmp";
 
         try
         {
-            File.WriteAllBytes(tmp, bytes);
+            File.WriteAllBytes(tempPath, bytes);
 
             if (File.Exists(path)) File.Delete(path);
 
-            File.Move(tmp, path);
+            File.Move(tempPath, path);
         }
         catch (Exception)
         {
-            if (File.Exists(tmp))
+            if (File.Exists(tempPath))
             {
-                try { File.Delete(tmp); } catch { }
+                try { File.Delete(tempPath); } catch { }
             }
+
             throw;
         }
     }

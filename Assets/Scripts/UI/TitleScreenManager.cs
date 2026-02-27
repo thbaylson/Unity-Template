@@ -22,6 +22,10 @@ public class TitleScreenManager : MonoBehaviour
         if (loadGameButton) loadGameButton.onClick.AddListener(OnLoadGame);
         if (settingsButton) settingsButton.onClick.AddListener(OnSettings);
         if (quitGameButton) quitGameButton.onClick.AddListener(OnQuit);
+
+#if UNITY_WEBGL
+        if (quitGameButton) quitGameButton.gameObject.SetActive(false);
+#endif
     }
 
     private void OnEnable()
