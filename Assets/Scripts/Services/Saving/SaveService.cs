@@ -55,10 +55,17 @@ public class SaveService : MonoBehaviour, ISaveService
     }
 
     public void MarkGameDirty() => IsGameDirty = true;
-    public bool LoadGameExists() => _storage.Exists(gameFileName);
+
+    public bool LoadGameExists()
+    {
+        _storage.SyncFromPersistentStorage();
+        return _storage.Exists(gameFileName);
+    }
 
     public void LoadGame()
     {
+        _storage.SyncFromPersistentStorage();
+
         if (!_storage.Exists(gameFileName))
         {
             GameDataCache = new GameDataCache();

@@ -8,6 +8,8 @@ public interface ISaveStorage
     byte[] ReadAllBytes(string fileName);
     void WriteAllBytes(string fileName, byte[] bytes);
     void Delete(string fileName);
+    void SyncFromPersistentStorage();
+    void SyncToPersistentStorage();
 }
 
 public class FileSaveStorage : ISaveStorage
@@ -38,6 +40,8 @@ public class FileSaveStorage : ISaveStorage
             if (File.Exists(path)) File.Delete(path);
 
             File.Move(tmp, path);
+
+            SyncToPersistentStorage();
         }
         catch (Exception)
         {
@@ -53,5 +57,17 @@ public class FileSaveStorage : ISaveStorage
     {
         var path = PathFor(fileName);
         if (File.Exists(path)) File.Delete(path);
+
+        SyncToPersistentStorage();
+    }
+
+    public void SyncFromPersistentStorage()
+    {
+        WebGLSaveFileSync.SyncFromPersistentStorage();
+    }
+
+    public void SyncToPersistentStorage()
+    {
+        WebGLSaveFileSync.SyncToPersistentStorage();
     }
 }
