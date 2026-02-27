@@ -4,12 +4,12 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Config/BootstrapConfig", fileName = "BootstrapConfig")]
 public class BootstrapConfig : ScriptableObject
 {
-    [Header("Scene Names")]
+    [Header("Bootstrap Scene Name")]
     public string bootstrapSceneName = "Bootstrap";
 
-    [Header("Persistent Manager Prefabs")]
-    [Tooltip("These managers will exist in every scene and persist across scene loads.")]
-    public ManagerPrefabEntry[] persistentManagers;
+    [Header("Persistent Service Prefabs")]
+    [Tooltip("These services will exist in every scene and persist across scene loads.")]
+    public ServicePrefabEntry[] persistentServices;
 
     [Header("Per-Scene Manager Profiles")]
     [Tooltip("These profiles define which managers should be instantiated for specific scenes.")]
@@ -27,7 +27,7 @@ public class BootstrapConfig : ScriptableObject
 }
 
 [Serializable]
-public class ManagerPrefabEntry
+public class ServicePrefabEntry
 {
     public GameObject prefab;
 }
