@@ -19,8 +19,7 @@ Suggested fields:
 - `Sprite Icon`
 - `AchievementCategory Category` (optional enum for filtering)
 - `bool IsHiddenUntilUnlocked` (optional)
-- `AchievementUnlockConditionType UnlockConditionType`
-- Condition payload fields (or a condition object reference)
+- `AchievementUnlockCondition UnlockCondition` (ScriptableObject reference)
 
 Implementation notes:
 - Store assets under `Assets/Resources/Achievements/Definitions/`.
@@ -32,14 +31,12 @@ Use a strategy-style condition interface so new unlock logic can be added increm
 Core concepts:
 - `IAchievementCondition`
   - `bool IsUnlocked(AchievementProgressState progressState, GameStatsSnapshot gameStats)`
-- `AchievementConditionFactory`
-  - Builds a runtime condition from definition data.
-- `AchievementUnlockConditionType`
-  - Examples: `CollectCountReached`, `DistanceTraveled`, `EnemiesDefeated`, `SceneVisited`.
+- `AchievementUnlockCondition` assets
+  - Examples: `TotalGoldOwnedAtLeastCondition`, `TotalGoldCollectedAtLeastCondition`, `SceneVisitedCondition`.
 
 Why this helps:
-- A new achievement often only needs a new definition asset using an existing condition type.
-- Truly new behavior only requires adding one new condition class and factory mapping.
+- A new achievement often only needs a new definition asset that references an existing condition asset.
+- Truly new behavior only requires adding one new condition ScriptableObject class.
 
 ### 3) Tracking and persistence layer
 Create a central `AchievementService` responsible for:
@@ -131,7 +128,7 @@ UX behavior:
 ## Definition authoring workflow for new achievements
 1. Duplicate an existing `AchievementDefinition` asset.
 2. Assign new ID, name, description, flavor text, and icon.
-3. Pick an existing condition type and set values.
+3. Assign an existing unlock condition asset and set values on that asset.
 4. Enter Play Mode and trigger relevant gameplay action.
 5. Verify unlock toast and menu state.
 
