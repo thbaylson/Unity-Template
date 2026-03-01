@@ -19,9 +19,7 @@ public class AchievementDefinition : ScriptableObject
     [SerializeField] private int displayOrder;
 
     [Header("Unlock Condition")]
-    [SerializeField] private AchievementConditionType conditionType;
-    [SerializeField] private int requiredAmount = 1;
-    [SerializeField] private string requiredSceneName;
+    [SerializeField] private AchievementUnlockCondition unlockCondition;
 
     public string Id => id;
     public string DisplayName => displayName;
@@ -30,7 +28,5 @@ public class AchievementDefinition : ScriptableObject
     public Sprite Icon => icon;
     public bool HideUntilUnlocked => hideUntilUnlocked;
     public int DisplayOrder => displayOrder;
-    public AchievementConditionType ConditionType => conditionType;
-    public int RequiredAmount => requiredAmount;
-    public string RequiredSceneName => requiredSceneName;
+    public AchievementUnlockCondition UnlockCondition => unlockCondition;
 }

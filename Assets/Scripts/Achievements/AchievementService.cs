@@ -82,7 +82,9 @@ public class AchievementService : MonoBehaviour, IAchievementService
         if (playerData == null) return;
 
         playerData.TotalGoldCollected += collectedAmount;
-        EvaluateAllAchievements(currentGoldOwned, playerData.TotalGoldCollected, SceneManager.GetActiveScene().name, true);
+
+        var evaluationContext = new AchievementEvaluationContext(currentGoldOwned, playerData.TotalGoldCollected, SceneManager.GetActiveScene().name);
+        EvaluateAllAchievements(evaluationContext, true);
     }
 
     public void RegisterSceneVisited(string sceneName)
@@ -99,10 +101,8 @@ public class AchievementService : MonoBehaviour, IAchievementService
             Services.SaveService?.MarkGameDirty();
         }
 
-        var currentGoldOwned = playerData.GoldAmount;
-        var totalGoldCollected = playerData.TotalGoldCollected;
-
-        EvaluateAllAchievements(currentGoldOwned, totalGoldCollected, sceneName, false);
+        var evaluationContext = new AchievementEvaluationContext(playerData.GoldAmount, playerData.TotalGoldCollected, sceneName);
+        EvaluateAllAchievements(evaluationContext, false);
     }
 
     private void TryInitializeFromSaveData()
@@ -129,6 +129,12 @@ public class AchievementService : MonoBehaviour, IAchievementService
             if (string.IsNullOrWhiteSpace(definition.Id))
             {
                 Debug.LogWarning($"Achievement definition '{definition.name}' has an empty id.");
+                continue;
+            }
+
+            if (definition.UnlockCondition == null)
+            {
+                Debug.LogWarning($"Achievement definition '{definition.name}' is missing an unlock condition.");
                 continue;
             }
 
@@ -170,7 +176,7 @@ public class AchievementService : MonoBehaviour, IAchievementService
         }
     }
 
-    private void EvaluateAllAchievements(int currentGoldOwned, int totalGoldCollected, string mostRecentScene, bool markSaveDirty)
+    private void EvaluateAllAchievements(AchievementEvaluationContext evaluationContext, bool markSaveDirty)
     {
         var hasAnyUnlocks = false;
         var hasAnyProgressUpdates = false;
@@ -180,43 +186,18 @@ public class AchievementService : MonoBehaviour, IAchievementService
             if (!_progressById.TryGetValue(definition.Id, out var progressState)) continue;
             if (progressState.IsUnlocked) continue;
 
-            switch (definition.ConditionType)
+            var evaluationResult = definition.UnlockCondition.Evaluate(evaluationContext, progressState);
+
+            if (progressState.CurrentProgressValue != evaluationResult.ProgressValue)
             {
-                case AchievementConditionType.TotalGoldOwnedAtLeast:
-                    var clampedGoldOwnedProgress = Mathf.Clamp(currentGoldOwned, 0, definition.RequiredAmount);
-                    if (progressState.CurrentProgressValue != clampedGoldOwnedProgress)
-                    {
-                        progressState.CurrentProgressValue = clampedGoldOwnedProgress;
-                        hasAnyProgressUpdates = true;
-                    }
-                    if (currentGoldOwned >= definition.RequiredAmount)
-                    {
-                        Unlock(definition, progressState);
-                        hasAnyUnlocks = true;
-                    }
-                    break;
-                case AchievementConditionType.TotalGoldCollectedAtLeast:
-                    var clampedTotalGoldProgress = Mathf.Clamp(totalGoldCollected, 0, definition.RequiredAmount);
-                    if (progressState.CurrentProgressValue != clampedTotalGoldProgress)
-                    {
-                        progressState.CurrentProgressValue = clampedTotalGoldProgress;
-                        hasAnyProgressUpdates = true;
-                    }
-                    if (totalGoldCollected >= definition.RequiredAmount)
-                    {
-                        Unlock(definition, progressState);
-                        hasAnyUnlocks = true;
-                    }
-                    break;
-                case AchievementConditionType.SceneVisited:
-                    progressState.CurrentProgressValue = 0;
-                    if (string.Equals(definition.RequiredSceneName, mostRecentScene, StringComparison.Ordinal))
-                    {
-                        Unlock(definition, progressState);
-                        hasAnyUnlocks = true;
-                    }
-                    break;
+                progressState.CurrentProgressValue = evaluationResult.ProgressValue;
+                hasAnyProgressUpdates = true;
             }
+
+            if (!evaluationResult.IsUnlocked) continue;
+
+            Unlock(definition, progressState, evaluationResult.UnlockProgressValue);
+            hasAnyUnlocks = true;
         }
 
         if (!hasAnyUnlocks && !hasAnyProgressUpdates) return;
@@ -228,10 +209,10 @@ public class AchievementService : MonoBehaviour, IAchievementService
         }
     }
 
-    private void Unlock(AchievementDefinition definition, AchievementProgressState progressState)
+    private void Unlock(AchievementDefinition definition, AchievementProgressState progressState, int unlockProgressValue)
     {
         progressState.IsUnlocked = true;
-        progressState.CurrentProgressValue = definition.RequiredAmount;
+        progressState.CurrentProgressValue = unlockProgressValue;
         progressState.UnlockedUnixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         Services.SaveService?.MarkGameDirty();
