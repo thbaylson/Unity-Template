@@ -21,7 +21,7 @@ public interface IAchievementService
 /// </summary>
 public class AchievementService : MonoBehaviour, IAchievementService
 {
-    private const string DefinitionResourcesPath = "Achievements/Definitions";
+    private const string DefinitionResourcesPath = "Achievements/";
 
     public event Action<AchievementDefinition> AchievementUnlocked;
     public event Action AchievementsChanged;
@@ -33,7 +33,7 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
     private void Awake()
     {
-        if (Services.AchievementService != null && Services.AchievementService != this)
+        if (Services.AchievementService != null)
         {
             Destroy(gameObject);
             return;

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8ff7cecaa734199a2c05cb940597fd2, type: 3}
+  m_Name: Visit ProBuilder Scene
+  m_EditorClassIdentifier: 
+  id: 0002
+  displayName: Visit the ProBuilder Level
+  description: Visit the PBInterior Level.
+  flavorText: It's exactly as big as it seems to be.
+  icon: {fileID: 21300000, guid: af0ae2dbf3d1efb4f82af377950704a2, type: 3}
+  hideUntilUnlocked: 1
+  displayOrder: 0
+  conditionType: 2
+  requiredAmount: 1
+  requiredSceneName: ProBuilderInterior

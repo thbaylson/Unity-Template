@@ -15,6 +15,7 @@ public class AchievementDefinition : ScriptableObject
     [SerializeField] [TextArea] private string flavorText;
     [SerializeField] private Sprite icon;
     [SerializeField] private bool hideUntilUnlocked;
+    [Tooltip("Lower values will display higher in the list with 0 being at the top.")]
     [SerializeField] private int displayOrder;
 
     [Header("Unlock Condition")]
