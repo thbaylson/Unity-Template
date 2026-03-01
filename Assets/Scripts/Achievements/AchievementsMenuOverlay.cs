@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Lightweight in-game achievements menu that can be opened with F8 or from the pause menu.
 /// </summary>
 public class AchievementsMenuOverlay : MonoBehaviour
 {
-    [SerializeField] private KeyCode toggleKey = KeyCode.F8;
+    [SerializeField] private Key toggleKey = Key.F8;
 
     private bool _isVisible;
     private Vector2 _scrollPosition;
@@ -15,7 +16,7 @@ public class AchievementsMenuOverlay : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(toggleKey))
+        if (WasKeyboardKeyPressed(toggleKey))
         {
             if (_isVisible)
             {
@@ -26,7 +27,7 @@ public class AchievementsMenuOverlay : MonoBehaviour
             Open();
         }
 
-        if (_isVisible && Input.GetKeyDown(KeyCode.Escape))
+        if (_isVisible && WasKeyboardKeyPressed(Key.Escape))
         {
             Close();
         }
@@ -121,5 +122,22 @@ public class AchievementsMenuOverlay : MonoBehaviour
         }
 
         GUI.DrawTexture(iconRect, icon.texture, ScaleMode.ScaleToFit);
+    }
+
+    private static bool WasKeyboardKeyPressed(Key key)
+    {
+        var keyboard = Keyboard.current;
+        if (keyboard == null)
+        {
+            return false;
+        }
+
+        var keyControl = keyboard[key];
+        if (keyControl == null)
+        {
+            return false;
+        }
+
+        return keyControl.wasPressedThisFrame;
     }
 }
