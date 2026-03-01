@@ -31,6 +31,7 @@ public class GoldCollector : MonoBehaviour
 
         Services.SaveService.GameDataCache.Player.GoldAmount = Gold;
         Services.SaveService.MarkGameDirty();
+        Services.AchievementService?.RegisterGoldCollected(amount, Gold);
         OnGoldChanged?.Invoke(Gold);
     }
 

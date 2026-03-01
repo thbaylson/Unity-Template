@@ -15,6 +15,7 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button saveButton;
     [SerializeField] private Button settingsButton;
+    [SerializeField] private Button achievementsButton;
     [SerializeField] private Button returnToTitleButton;
 
     [Header("Scene Target")]
@@ -37,6 +38,7 @@ public class PauseMenuUI : MonoBehaviour
         if (returnToTitleButton) returnToTitleButton.onClick.AddListener(ReturnToTitle);
         if (saveButton) saveButton.onClick.AddListener(Save);
         if (settingsButton) settingsButton.onClick.AddListener(Settings);
+        if (achievementsButton) achievementsButton.onClick.AddListener(Achievements);
     }
 
     public void Resume()
@@ -63,6 +65,19 @@ public class PauseMenuUI : MonoBehaviour
         SetVisible(false);
     }
 
+    public void Achievements()
+    {
+        var achievementsMenuOverlay = FindFirstObjectByType<AchievementsMenuOverlay>();
+        if (achievementsMenuOverlay == null)
+        {
+            return;
+        }
+
+        Services.PauseService?.SetUIFocus(false);
+        SetVisible(false);
+        achievementsMenuOverlay.Open(onClosed: HandleAchievementsClosed);
+    }
+
     public void SetVisible(bool paused)
     {
         if (menuRoot) menuRoot.SetActive(paused);
@@ -79,5 +94,10 @@ public class PauseMenuUI : MonoBehaviour
     {
         SetVisible(true);
         Services.PauseService?.SetUIFocus(true);
+    }
+
+    private void HandleAchievementsClosed()
+    {
+        HandleFocusReturned();
     }
 }
