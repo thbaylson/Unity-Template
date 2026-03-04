@@ -33,7 +33,7 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
     private void Awake()
     {
-        if (Services.AchievementService != null && Services.AchievementService != this)
+        if (Services.AchievementService != null)
         {
             Destroy(gameObject);
             return;
