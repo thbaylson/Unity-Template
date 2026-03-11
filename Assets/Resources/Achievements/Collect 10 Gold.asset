@@ -19,6 +19,4 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: b74c31d447d2f5d41a61081bdf5e7126, type: 3}
   hideUntilUnlocked: 0
   displayOrder: 0
-  conditionType: 1
-  requiredAmount: 10
-  requiredSceneName: 
+  unlockCondition: {fileID: 11400000, guid: 2cd25da3858a05845877f7a333c6f252, type: 2}
