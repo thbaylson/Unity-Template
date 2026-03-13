@@ -329,6 +329,7 @@ MonoBehaviour:
   settingsButton: {fileID: 6018647549474943588}
   achievementsButton: {fileID: 1969859331841036184}
   returnToTitleButton: {fileID: 1504873717721754465}
+  achievementsSubscreen: {fileID: 1802885067086384780, guid: 2ef6beddd0d27e144820917880b3d897, type: 3}
   titleSceneName: Title
 --- !u!114 &1460486672139802947
 MonoBehaviour:

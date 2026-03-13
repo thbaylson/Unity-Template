@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8ff7cecaa734199a2c05cb940597fd2, type: 3}
   m_Name: Visit ProBuilder Scene
   m_EditorClassIdentifier: 
-  id: 0002
+  id: 0201
   displayName: ProBuilder Explorer
   description: Visit the PBInterior Level.
   flavorText: It's exactly as big as it seems to be.
-  icon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: 47fc9f26dfb28ee459b98fd7ace4a486, type: 3}
   hideUntilUnlocked: 1
   displayOrder: 0
   unlockCondition: {fileID: 11400000, guid: 8048907576e5bca4590a8c2605076f08, type: 2}

@@ -29,8 +29,6 @@ public class AchievementService : MonoBehaviour, IAchievementService
     private readonly Dictionary<string, AchievementDefinition> _definitionById = new Dictionary<string, AchievementDefinition>();
     private readonly Dictionary<string, AchievementProgressState> _progressById = new Dictionary<string, AchievementProgressState>();
 
-    private bool _isInitialized;
-
     private void Awake()
     {
         if (Services.AchievementService != null)
@@ -40,23 +38,23 @@ public class AchievementService : MonoBehaviour, IAchievementService
         }
 
         Services.AchievementService = this;
-        DontDestroyOnLoad(gameObject);
         LoadDefinitions();
     }
 
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        Services.SaveService.GameDeleted += TryInitializeFromSaveData;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        Services.SaveService.GameDeleted -= TryInitializeFromSaveData;
     }
 
-    private void Update()
+    private void Start()
     {
-        if (_isInitialized) return;
         TryInitializeFromSaveData();
     }
 
@@ -75,7 +73,6 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
     public void RegisterGoldCollected(int collectedAmount, int currentGoldOwned)
     {
-        if (!_isInitialized) return;
         if (collectedAmount <= 0) return;
 
         var playerData = Services.SaveService?.GameDataCache?.Player;
@@ -89,7 +86,6 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
     public void RegisterSceneVisited(string sceneName)
     {
-        if (!_isInitialized) return;
         if (string.IsNullOrWhiteSpace(sceneName)) return;
 
         var playerData = Services.SaveService?.GameDataCache?.Player;
@@ -112,7 +108,6 @@ public class AchievementService : MonoBehaviour, IAchievementService
         if (saveService.GameDataCache?.Player == null) return;
 
         BuildProgressFromPlayerData(saveService.GameDataCache.Player);
-        _isInitialized = true;
 
         RegisterSceneVisited(SceneManager.GetActiveScene().name);
         AchievementsChanged?.Invoke();

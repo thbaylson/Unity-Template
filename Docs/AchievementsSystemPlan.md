@@ -17,20 +17,19 @@ Suggested fields:
 - `string Description`
 - `string FlavorText`
 - `Sprite Icon`
-- `AchievementCategory Category` (optional enum for filtering)
 - `bool IsHiddenUntilUnlocked` (optional)
 - `AchievementUnlockCondition UnlockCondition` (ScriptableObject reference)
 
 Implementation notes:
-- Store assets under `Assets/Resources/Achievements/Definitions/`.
-- Keep one achievement per asset so designers can add new entries without code edits.
+- Store achievement definitions under `Assets/Resources/Achievements/`.
+- Store achievement conditions under `Assets/Resources/Achievements/Conditions`.
 
-### 2) Condition/evaluation layer (runtime)
-Use a strategy-style condition interface so new unlock logic can be added incrementally.
+### 2) Evaluation layer (runtime)
+Use an abstract condition so new unlock logic can be added incrementally.
 
 Core concepts:
-- `IAchievementCondition`
-  - `bool IsUnlocked(AchievementProgressState progressState, GameStatsSnapshot gameStats)`
+- `AchievementUnlockCondition`
+  - `AchievementConditionEvaluationResult Evaluate(AchievementEvaluationContext evaluationContext, AchievementProgressState progressState)`
 - `AchievementUnlockCondition` assets
   - Examples: `TotalGoldOwnedAtLeastCondition`, `TotalGoldCollectedAtLeastCondition`, `SceneVisitedCondition`.
 
@@ -50,7 +49,7 @@ Data models:
   - `string AchievementId`
   - `bool IsUnlocked`
   - `long UnlockedUnixTime`
-  - Optional counters for incremental progress.
+  - `int CurrentProgressValue`
 - `AchievementSaveData`
   - List/dictionary of progress states.
   - Save version for migration.
@@ -73,35 +72,18 @@ Guidelines:
 - Keep achievement logic out of gameplay classes.
 - Batch evaluation where possible to avoid checking every achievement every frame.
 
-### 5) UI layer
-Add an Achievements menu panel under the existing UI structure.
-
-Recommended pieces:
-- `AchievementsMenuController`
-  - Opens/closes the panel.
-  - Requests achievement view models from the service.
-- `AchievementListItemView`
-  - Displays icon, name, description, flavor text, and unlock state.
-- Optional tabs/filters:
-  - `All`, `Unlocked`, `Locked`, and category filters.
-
-UX behavior:
-- Locked hidden achievements can show placeholder text/icon.
-- Newly unlocked achievements can trigger a temporary toast notification.
-- Provide sorting options (default order, unlocked first, latest unlocked).
-
 ## File and folder proposal
 - `Assets/Scripts/Achievements/`
-  - `AchievementDefinition.cs`
   - `AchievementService.cs`
+  - `AchievementDefinition.cs`
+  - `AchievementEvaluationContext.cs`
+  - `AchievementConditionEvaluationResult.cs`
   - `AchievementProgressState.cs`
-  - `AchievementSaveData.cs`
   - `Conditions/`
-  - `UI/`
-- `Assets/Resources/Achievements/Definitions/`
-  - One `.asset` per achievement.
-- `Assets/Prefabs/UI/Achievements/`
-  - Menu panel and list item prefabs.
+- `Assets/Resources/Achievements/`
+  - One `.asset` per achievement definition.
+- `Assets/Resources/Achievements/Conditions`
+  - One `.asset` per achievement condition.
 
 ## Suggested implementation phases
 
@@ -118,7 +100,7 @@ UX behavior:
 ### Phase 3: Achievements UI menu
 - Build menu panel and list item prefab.
 - Bind UI to service data (including icon, name, description, flavor text).
-- Add basic filtering and locked state presentation.
+- Add locked state presentation.
 
 ### Phase 4: Content workflow hardening
 - Add validation checks (duplicate ID detection, missing icon warnings).
@@ -128,9 +110,10 @@ UX behavior:
 ## Definition authoring workflow for new achievements
 1. Duplicate an existing `AchievementDefinition` asset.
 2. Assign new ID, name, description, flavor text, and icon.
-3. Assign an existing unlock condition asset and set values on that asset.
-4. Enter Play Mode and trigger relevant gameplay action.
-5. Verify unlock toast and menu state.
+3. Create a new unlock condition asset and set values on that asset.
+4. Assign the new unlock condition to the new achievement definition.
+5. Enter Play Mode and trigger relevant gameplay action.
+6. Verify menu state.
 
 This workflow should keep most future additions code-free.
 

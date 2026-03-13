@@ -50,8 +50,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1e9eb84b10aaa24cb472b0101fd72cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  achievement: {fileID: 0}
   icon: {fileID: 5006736444060067516}
+  lockedIcon: {fileID: 21300000, guid: dd70b84b9eac30241b7ae64b79e8f577, type: 3}
   displayName: {fileID: 525274771930065619}
   description: {fileID: 4136647198653183578}
   flavorText: {fileID: 1135414017204197215}
@@ -273,7 +273,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7824121591501592552
 RectTransform:
   m_ObjectHideFlags: 0
@@ -315,7 +315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.7294118, g: 0.7294118, b: 0.7294118, a: 0.95686275}
+  m_Color: {r: 0.7294118, g: 0.7294118, b: 0.7294118, a: 0.23529412}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

@@ -43,6 +43,7 @@ Key dependencies from `Packages/manifest.json`:
 
 ## Credits
 - Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle
+- Sprites by SunGraphica: https://sungraphica.itch.io/
 
 ## Supplemental design docs
 - `Docs/AchievementsSystemPlan.md` — implementation plan for an in-game, data-driven achievements system.
