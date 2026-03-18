@@ -57,3 +57,9 @@ Key dependencies from `Packages/manifest.json`:
 - **Definitions path**: Add new assets under `Assets/Resources/Achievements/Definitions/` so they are discovered automatically.
 - **Player menu (`Assets/Scripts/Achievements/AchievementsMenuOverlay.cs`)**: Open the in-game achievements menu with `F8` or wire the optional pause menu button field.
 
+## Maze system
+- **Runtime manager (`Assets/Scripts/Maze/MazeManager.cs`)**: Generates a seeded maze at runtime with a pure C# algorithm and builds the traversable space with ProBuilder meshes.
+- **Config asset (`Assets/Resources/Config/MazeConfig.asset`)**: Controls maze dimensions, materials, coin counts, doorway references, and seed override behavior.
+- **Dedicated maze save (`maze_save.json`)**: Maze state is stored separately from the player save, including the active seed, completion flag, and collected maze coin ids.
+- **Scene flow**: `Assets/Scenes/FlatScene.unity` contains a doorway into `Assets/Scenes/MazeScene.unity`, and solving the maze routes the player back to FlatScene through the same doorway prefab.
+

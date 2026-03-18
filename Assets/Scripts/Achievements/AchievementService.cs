@@ -271,6 +271,7 @@ namespace Template.Achievements
             playerData.GoldAmount,
             playerData.TotalGoldCollected,
             playerData.TotalEmotesPerformed,
+            playerData.TotalMazesSolved,
             playerData.VisitedSceneNames,
             SceneManager.GetActiveScene().name);
 

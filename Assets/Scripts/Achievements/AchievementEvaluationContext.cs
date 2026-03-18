@@ -11,10 +11,28 @@ namespace Template.Achievements
             int totalEmotesPerformed,
             IReadOnlyCollection<string> visitedSceneNames,
             string mostRecentScene)
+            : this(
+                currentGoldOwned,
+                totalGoldCollected,
+                totalEmotesPerformed,
+                0,
+                visitedSceneNames,
+                mostRecentScene)
+        {
+        }
+
+        public AchievementEvaluationContext(
+            int currentGoldOwned,
+            int totalGoldCollected,
+            int totalEmotesPerformed,
+            int totalMazesSolved,
+            IReadOnlyCollection<string> visitedSceneNames,
+            string mostRecentScene)
         {
             CurrentGoldOwned = currentGoldOwned;
             TotalGoldCollected = totalGoldCollected;
             TotalEmotesPerformed = totalEmotesPerformed;
+            TotalMazesSolved = totalMazesSolved;
             VisitedSceneNames = visitedSceneNames;
             MostRecentScene = mostRecentScene;
         }
@@ -22,6 +40,7 @@ namespace Template.Achievements
         public int CurrentGoldOwned { get; }
         public int TotalGoldCollected { get; }
         public int TotalEmotesPerformed { get; }
+        public int TotalMazesSolved { get; }
         public IReadOnlyCollection<string> VisitedSceneNames { get; }
         public string MostRecentScene { get; }
 

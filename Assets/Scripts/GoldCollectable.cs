@@ -9,6 +9,8 @@ namespace Template
         [SerializeField] private int amount = 1;
         private bool collected = false;
 
+        public int Amount => Mathf.Max(1, amount);
+
         void OnTriggerEnter(Collider other)
         {
             var collect = other.GetComponentInChildren<GoldCollector>();
