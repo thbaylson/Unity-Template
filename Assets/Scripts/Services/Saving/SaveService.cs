@@ -7,7 +7,8 @@ public interface ISaveService
 {
     GameDataCache GameDataCache { get; }
     bool IsGameDirty { get; }
-    
+
+    event Action GameLoaded;
     event Action GameDeleted;
 
     void MarkGameDirty();
@@ -32,6 +33,7 @@ public class SaveService : MonoBehaviour, ISaveService
     public GameDataCache GameDataCache { get; private set; } = new GameDataCache();
     public bool IsGameDirty { get; private set; }
     
+    public event Action GameLoaded;
     public event Action GameDeleted;
 
     // Self-registered flaggables, grouped by scene name.
@@ -117,11 +119,17 @@ public class SaveService : MonoBehaviour, ISaveService
 
             // Apply for currently active scene(s)
             ApplyFlagsForScene(SceneManager.GetActiveScene().name);
+            Debug.Log("Game loaded successfully.");
         }
         catch
         {
             GameDataCache = new GameDataCache();
             IsGameDirty = true;
+            Debug.Log("Game load failed.");
+        }
+        finally
+        {
+            GameLoaded?.Invoke();
         }
     }
 

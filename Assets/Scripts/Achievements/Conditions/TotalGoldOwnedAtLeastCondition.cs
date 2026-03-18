@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -6,12 +7,29 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Achievements/Conditions/Total Gold Owned At Least", fileName = "TotalGoldOwnedAtLeastCondition")]
 public class TotalGoldOwnedAtLeastCondition : AchievementUnlockCondition
 {
+    private static readonly string[] SignalKeys =
+    {
+        AchievementSignalKeys.GoldOwnedChanged
+    };
+
     [SerializeField] private int requiredGoldAmount = 1;
 
-    public override AchievementConditionEvaluationResult Evaluate(AchievementEvaluationContext evaluationContext, AchievementProgressState progressState)
+    public override IReadOnlyList<string> RelevantSignalKeys => SignalKeys;
+
+    public override AchievementConditionEvaluationResult Evaluate(
+        AchievementEvaluationContext evaluationContext,
+        AchievementProgressState progressState)
     {
-        var clampedProgress = Mathf.Clamp(evaluationContext.CurrentGoldOwned, 0, requiredGoldAmount);
+        var clampedProgress = Mathf.Clamp(
+            evaluationContext.CurrentGoldOwned,
+            0,
+            requiredGoldAmount);
+
         var isUnlocked = evaluationContext.CurrentGoldOwned >= requiredGoldAmount;
-        return new AchievementConditionEvaluationResult(isUnlocked, clampedProgress, requiredGoldAmount);
+
+        return new AchievementConditionEvaluationResult(
+            isUnlocked,
+            clampedProgress,
+            requiredGoldAmount);
     }
 }

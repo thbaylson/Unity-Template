@@ -11,13 +11,12 @@ public interface IAchievementService
 
     IReadOnlyList<AchievementDefinition> GetAllDefinitions();
     AchievementProgressState GetProgress(string achievementId);
-
-    void RegisterGoldCollected(int collectedAmount, int currentGoldOwned);
-    void RegisterSceneVisited(string sceneName);
 }
 
 /// <summary>
 /// Tracks achievement progress and persists data in player save data.
+/// This service doesn't know about specific gameplay actions like gold collection.
+/// It listens to generic progression signals and evaluates only the affected achievements.
 /// </summary>
 public class AchievementService : MonoBehaviour, IAchievementService
 {
@@ -26,8 +25,14 @@ public class AchievementService : MonoBehaviour, IAchievementService
     public event Action<AchievementDefinition> AchievementUnlocked;
     public event Action AchievementsChanged;
 
-    private readonly Dictionary<string, AchievementDefinition> _definitionById = new Dictionary<string, AchievementDefinition>();
-    private readonly Dictionary<string, AchievementProgressState> _progressById = new Dictionary<string, AchievementProgressState>();
+    private readonly Dictionary<string, AchievementDefinition> _definitionById =
+        new Dictionary<string, AchievementDefinition>(StringComparer.Ordinal);
+
+    private readonly Dictionary<string, AchievementProgressState> _progressById =
+        new Dictionary<string, AchievementProgressState>(StringComparer.Ordinal);
+
+    private readonly Dictionary<string, List<AchievementDefinition>> _definitionsBySignalKey =
+        new Dictionary<string, List<AchievementDefinition>>(StringComparer.Ordinal);
 
     private void Awake()
     {
@@ -38,24 +43,31 @@ public class AchievementService : MonoBehaviour, IAchievementService
         }
 
         Services.AchievementService = this;
+
         LoadDefinitions();
+        BuildSignalIndex();
     }
 
     private void OnEnable()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        Services.SaveService.GameDeleted += TryInitializeFromSaveData;
+        AchievementSignalBus.SignalRaised += OnSignalRaised;
+
+        if (Services.SaveService != null)
+        {
+            Services.SaveService.GameLoaded += TryInitializeFromSaveData;
+            Services.SaveService.GameDeleted += TryInitializeFromSaveData;
+        }
     }
 
     private void OnDisable()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-        Services.SaveService.GameDeleted -= TryInitializeFromSaveData;
-    }
+        AchievementSignalBus.SignalRaised -= OnSignalRaised;
 
-    private void Start()
-    {
-        TryInitializeFromSaveData();
+        if (Services.SaveService != null)
+        {
+            Services.SaveService.GameLoaded -= TryInitializeFromSaveData;
+            Services.SaveService.GameDeleted -= TryInitializeFromSaveData;
+        }
     }
 
     public IReadOnlyList<AchievementDefinition> GetAllDefinitions()
@@ -71,45 +83,18 @@ public class AchievementService : MonoBehaviour, IAchievementService
         return progressState;
     }
 
-    public void RegisterGoldCollected(int collectedAmount, int currentGoldOwned)
-    {
-        if (collectedAmount <= 0) return;
-
-        var playerData = Services.SaveService?.GameDataCache?.Player;
-        if (playerData == null) return;
-
-        playerData.TotalGoldCollected += collectedAmount;
-
-        var evaluationContext = new AchievementEvaluationContext(currentGoldOwned, playerData.TotalGoldCollected, SceneManager.GetActiveScene().name);
-        EvaluateAllAchievements(evaluationContext, true);
-    }
-
-    public void RegisterSceneVisited(string sceneName)
-    {
-        if (string.IsNullOrWhiteSpace(sceneName)) return;
-
-        var playerData = Services.SaveService?.GameDataCache?.Player;
-        if (playerData == null) return;
-
-        if (!playerData.VisitedSceneNames.Contains(sceneName))
-        {
-            playerData.VisitedSceneNames.Add(sceneName);
-            Services.SaveService?.MarkGameDirty();
-        }
-
-        var evaluationContext = new AchievementEvaluationContext(playerData.GoldAmount, playerData.TotalGoldCollected, sceneName);
-        EvaluateAllAchievements(evaluationContext, false);
-    }
-
     private void TryInitializeFromSaveData()
     {
-        var saveService = Services.SaveService;
-        if (saveService == null) return;
-        if (saveService.GameDataCache?.Player == null) return;
+        var playerData = Services.SaveService?.GameDataCache?.Player;
+        if (playerData == null) return;
 
-        BuildProgressFromPlayerData(saveService.GameDataCache.Player);
+        BuildProgressFromPlayerData(playerData);
 
-        RegisterSceneVisited(SceneManager.GetActiveScene().name);
+        // One full scan at initialization/reset is fine and lets newly added
+        // achievements backfill from existing save data.
+        EvaluateAllFromCurrentState();
+
+        // Always notify once so UI can refresh its initial state.
         AchievementsChanged?.Invoke();
     }
 
@@ -121,6 +106,7 @@ public class AchievementService : MonoBehaviour, IAchievementService
         foreach (var definition in definitions)
         {
             if (definition == null) continue;
+
             if (string.IsNullOrWhiteSpace(definition.Id))
             {
                 Debug.LogWarning($"Achievement definition '{definition.name}' has an empty id.");
@@ -143,6 +129,41 @@ public class AchievementService : MonoBehaviour, IAchievementService
         }
     }
 
+    private void BuildSignalIndex()
+    {
+        _definitionsBySignalKey.Clear();
+
+        foreach (var definition in _definitionById.Values)
+        {
+            var condition = definition.UnlockCondition;
+            var signalKeys = condition.RelevantSignalKeys;
+
+            if (signalKeys == null || signalKeys.Count == 0)
+            {
+                Debug.LogWarning(
+                    $"Achievement definition '{definition.name}' has no RelevantSignalKeys. " +
+                    "It will only be evaluated during initialization.");
+                continue;
+            }
+
+            foreach (var signalKey in signalKeys)
+            {
+                if (string.IsNullOrWhiteSpace(signalKey)) continue;
+
+                if (!_definitionsBySignalKey.TryGetValue(signalKey, out var definitions))
+                {
+                    definitions = new List<AchievementDefinition>();
+                    _definitionsBySignalKey.Add(signalKey, definitions);
+                }
+
+                if (!definitions.Contains(definition))
+                {
+                    definitions.Add(definition);
+                }
+            }
+        }
+    }
+
     private void BuildProgressFromPlayerData(PlayerSaveData playerSaveData)
     {
         _progressById.Clear();
@@ -152,9 +173,15 @@ public class AchievementService : MonoBehaviour, IAchievementService
             playerSaveData.Achievements = new List<AchievementProgressState>();
         }
 
+        if (playerSaveData.VisitedSceneNames == null)
+        {
+            playerSaveData.VisitedSceneNames = new List<string>();
+        }
+
         foreach (var savedProgressState in playerSaveData.Achievements)
         {
             if (savedProgressState == null || string.IsNullOrWhiteSpace(savedProgressState.AchievementId)) continue;
+
             _progressById[savedProgressState.AchievementId] = savedProgressState;
         }
 
@@ -164,21 +191,68 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
             var progressState = new AchievementProgressState
             {
-                AchievementId = definition.Id,
+                AchievementId = definition.Id
             };
+
             _progressById.Add(definition.Id, progressState);
             playerSaveData.Achievements.Add(progressState);
         }
     }
 
-    private void EvaluateAllAchievements(AchievementEvaluationContext evaluationContext, bool markSaveDirty)
+    private void OnSignalRaised(string signalKey)
+    {
+        if (string.IsNullOrWhiteSpace(signalKey)) return;
+
+        if (!_definitionsBySignalKey.TryGetValue(signalKey, out var definitions) || definitions.Count == 0) return;
+
+        if (!TryBuildEvaluationContext(out var evaluationContext)) return;
+
+        EvaluateDefinitions(definitions, evaluationContext);
+    }
+
+    private void EvaluateAllFromCurrentState()
+    {
+        if (!TryBuildEvaluationContext(out var evaluationContext)) return;
+
+        EvaluateDefinitions(_definitionById.Values, evaluationContext);
+    }
+
+    private bool TryBuildEvaluationContext(out AchievementEvaluationContext evaluationContext)
+    {
+        var playerData = Services.SaveService?.GameDataCache?.Player;
+        if (playerData == null)
+        {
+            evaluationContext = default;
+            return false;
+        }
+
+        if (playerData.VisitedSceneNames == null)
+        {
+            playerData.VisitedSceneNames = new List<string>();
+        }
+
+        evaluationContext = new AchievementEvaluationContext(
+            playerData.GoldAmount,
+            playerData.TotalGoldCollected,
+            playerData.VisitedSceneNames,
+            SceneManager.GetActiveScene().name);
+
+        return true;
+    }
+
+    private void EvaluateDefinitions(
+        IEnumerable<AchievementDefinition> definitions,
+        AchievementEvaluationContext evaluationContext)
     {
         var hasAnyUnlocks = false;
         var hasAnyProgressUpdates = false;
 
-        foreach (var definition in _definitionById.Values)
+        foreach (var definition in definitions)
         {
+            if (definition == null) continue;
+
             if (!_progressById.TryGetValue(definition.Id, out var progressState)) continue;
+
             if (progressState.IsUnlocked) continue;
 
             var evaluationResult = definition.UnlockCondition.Evaluate(evaluationContext, progressState);
@@ -197,14 +271,18 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
         if (!hasAnyUnlocks && !hasAnyProgressUpdates) return;
 
-        AchievementsChanged?.Invoke();
-        if (markSaveDirty || hasAnyProgressUpdates)
+        if (hasAnyProgressUpdates)
         {
             Services.SaveService?.MarkGameDirty();
         }
+
+        AchievementsChanged?.Invoke();
     }
 
-    private void Unlock(AchievementDefinition definition, AchievementProgressState progressState, int unlockProgressValue)
+    private void Unlock(
+        AchievementDefinition definition,
+        AchievementProgressState progressState,
+        int unlockProgressValue)
     {
         progressState.IsUnlocked = true;
         progressState.CurrentProgressValue = unlockProgressValue;
@@ -212,10 +290,6 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
         Services.SaveService?.MarkGameDirty();
         AchievementUnlocked?.Invoke(definition);
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        RegisterSceneVisited(scene.name);
+        Debug.Log($"Achievement unlocked: {definition.DisplayName}");
     }
 }

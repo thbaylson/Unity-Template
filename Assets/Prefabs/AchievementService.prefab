@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7345600012345678902}
   - component: {fileID: 7345600012345678903}
+  - component: {fileID: -671807454386929699}
+  - component: {fileID: 1758883296702478582}
   m_Layer: 0
   m_Name: AchievementService
   m_TagString: Untagged
@@ -42,5 +44,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbfc1fd4eaf84c7eb3cffdde879adf81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-671807454386929699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7345600012345678901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98043a068a1e2ec4b940e4104cf9e27a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1758883296702478582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7345600012345678901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 305e73179c6651d48aae992dac1e4bea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
