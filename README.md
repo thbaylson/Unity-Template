@@ -41,6 +41,11 @@ Key dependencies from `Packages/manifest.json`:
 - When adding math-heavy logic, document calculations for clarity.
 - Use Play Mode to validate new interactions before committing.
 
+## Testing
+- **EditMode tests in the editor**: Open `Window > General > Test Runner`, switch to the `EditMode` tab, and run the suite.
+- **EditMode tests from PowerShell**: Run `./ci/run-editmode-tests.ps1` from the project root.
+- **Unity batchmode note**: This project may return a non-zero Unity process exit code even when tests pass. The wrapper script treats the NUnit XML result as the source of truth and writes a stable copy to `Logs/EditModeTestResults.xml`.
+- **Optional filters**: Use `-TestFilter "AchievementUnlockEvaluatorTests"` or `-AssemblyNames "Assembly-CSharp-Editor.dll"` to narrow the run.
 ## Credits
 - Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle
 - Sprites by SunGraphica: https://sungraphica.itch.io/
@@ -54,3 +59,4 @@ Key dependencies from `Packages/manifest.json`:
 - **Condition assets (`Assets/Scripts/Achievements/Conditions/`)**: Reusable `ScriptableObject` unlock logic so most new achievements only require data asset creation.
 - **Definitions path**: Add new assets under `Assets/Resources/Achievements/Definitions/` so they are discovered automatically.
 - **Player menu (`Assets/Scripts/Achievements/AchievementsMenuOverlay.cs`)**: Open the in-game achievements menu with `F8` or wire the optional pause menu button field.
+
