@@ -11,6 +11,7 @@ public interface IAchievementService
 
     IReadOnlyList<AchievementDefinition> GetAllDefinitions();
     AchievementProgressState GetProgress(string achievementId);
+    AchievementDisplayProgress GetDisplayProgress(AchievementDefinition definition);
 }
 
 /// <summary>
@@ -81,6 +82,35 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
         _progressById.TryGetValue(achievementId, out var progressState);
         return progressState;
+    }
+
+    public AchievementDisplayProgress GetDisplayProgress(AchievementDefinition definition)
+    {
+        if (definition == null)
+        {
+            return default;
+        }
+
+        var progressState = GetProgress(definition.Id);
+        if (progressState == null)
+        {
+            return default;
+        }
+
+        if (!TryBuildEvaluationContext(out var evaluationContext))
+        {
+            return new AchievementDisplayProgress(
+                progressState.IsUnlocked,
+                progressState.CurrentProgressValue,
+                progressState.IsUnlocked ? progressState.CurrentProgressValue : 0);
+        }
+
+        var evaluationResult = definition.UnlockCondition.Evaluate(evaluationContext, progressState);
+
+        return new AchievementDisplayProgress(
+            progressState.IsUnlocked || evaluationResult.IsUnlocked,
+            evaluationResult.ProgressValue,
+            evaluationResult.UnlockProgressValue);
     }
 
     private void TryInitializeFromSaveData()
