@@ -1,4 +1,4 @@
-# In-Game Achievements System Guide
+﻿# In-Game Achievements System Guide
 
 ## Purpose
 This document describes the achievements architecture for the project.
@@ -78,6 +78,7 @@ Conditions should expose:
 ### Current built-in condition examples
 - `TotalGoldCollectedAtLeastCondition`
 - `TotalGoldOwnedAtLeastCondition`
+- `TotalEmotesPerformedAtLeastCondition`
 - `SceneVisitedCondition`
 
 ### Important rule
@@ -101,6 +102,7 @@ Avoid this:
 The refactored context should expose the progression state required by conditions, such as:
 - `CurrentGoldOwned`
 - `TotalGoldCollected`
+- `TotalEmotesPerformed`
 - `VisitedSceneNames`
 - `MostRecentScene`
 
@@ -119,6 +121,7 @@ A static class that defines canonical keys for achievement-related triggers.
 Current examples:
 - `progress.gold.collected`
 - `progress.gold.owned.changed`
+- `progress.emote.performed`
 - `progress.scene.visited`
 
 ### `AchievementSignalBus`
@@ -134,6 +137,7 @@ Reporter components subscribe to gameplay/progression events and publish achieve
 
 ### Current reporters
 - `GoldAchievementSignalReporter`
+- `EmoteAchievementSignalReporter`
 - `SceneVisitAchievementSignalReporter`
 
 ### Reporter responsibilities
@@ -180,6 +184,7 @@ The service should:
 That means the service evaluates:
 - gold-owned achievements when gold-owned changes
 - total-gold-collected achievements when collected-gold changes
+- emote achievements when an emote is successfully started
 - scene-visit achievements when a scene visit signal is published
 
 It should **not** evaluate every achievement every time the player does anything.
@@ -187,7 +192,7 @@ It should **not** evaluate every achievement every time the player does anything
 ---
 
 ## 7) Persistence model
-The system now relies on the project’s existing save architecture instead of introducing a separate achievement save file design.
+The system now relies on the projectâ€™s existing save architecture instead of introducing a separate achievement save file design.
 
 ### Current persistence source of truth
 Achievement progress is stored in `PlayerSaveData` and accessed through `SaveService`.
@@ -200,6 +205,7 @@ Achievement-specific persisted data:
 Progression data used by conditions:
 - `PlayerSaveData.GoldAmount`
 - `PlayerSaveData.TotalGoldCollected`
+- `PlayerSaveData.TotalEmotesPerformed`
 - `PlayerSaveData.VisitedSceneNames`
 
 ### `AchievementProgressState`
@@ -249,6 +255,19 @@ Scene-related achievement logic is routed through a generic signal, not a scene-
 
 ---
 
+## Emote performed
+### Flow
+1. `EmoteController` successfully starts an emote animation.
+2. `EmoteController` raises its gameplay delegate for the performed emote.
+3. `EmoteAchievementSignalReporter` increments `PlayerSaveData.TotalEmotesPerformed`.
+4. The reporter publishes `progress.emote.performed`.
+5. `AchievementService` evaluates only emote-related achievements.
+
+### Architectural consequence
+The emote system remains achievement-agnostic and only reports that an emote happened.
+
+---
+
 ## Initialization and bootstrap behavior
 On startup or after save reset:
 1. `AchievementService` loads all definitions.
@@ -273,11 +292,13 @@ Recommended structure:
   - `AchievementProgressState.cs`
   - `AchievementSignalBus.cs`
   - `AchievementSignalKeys.cs`
+  - `EmoteAchievementSignalReporter.cs`
   - `GoldAchievementSignalReporter.cs`
   - `SceneVisitAchievementSignalReporter.cs`
   - `Conditions/`
     - `AchievementUnlockCondition.cs`
     - `SceneVisitedCondition.cs`
+    - `TotalEmotesPerformedAtLeastCondition.cs`
     - `TotalGoldCollectedAtLeastCondition.cs`
     - `TotalGoldOwnedAtLeastCondition.cs`
 
@@ -365,7 +386,7 @@ These are usually safe and localized:
 - Achievement definitions are authored as assets.
 - Achievement progress persists across game restarts through the existing save system.
 - Unlocking an achievement updates UI state immediately through service events.
-- Gold and scene achievements do not require gameplay systems to call achievement-specific registration methods.
+- Gold, emote, and scene achievements do not require gameplay systems to call achievement-specific registration methods.
 - Runtime evaluation is signal-routed and targeted.
 - No external service or network dependency is required.
 

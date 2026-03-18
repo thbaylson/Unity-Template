@@ -234,6 +234,7 @@ public class AchievementService : MonoBehaviour, IAchievementService
         evaluationContext = new AchievementEvaluationContext(
             playerData.GoldAmount,
             playerData.TotalGoldCollected,
+            playerData.TotalEmotesPerformed,
             playerData.VisitedSceneNames,
             SceneManager.GetActiveScene().name);
 

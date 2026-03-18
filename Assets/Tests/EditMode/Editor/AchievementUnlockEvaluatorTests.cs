@@ -80,6 +80,37 @@ public class AchievementUnlockEvaluatorTests
     }
 
     [Test]
+    public void TotalEmotesPerformedCondition_UnlocksAfterRequiredCount()
+    {
+        var condition = CreateCondition<TotalEmotesPerformedAtLeastCondition>(
+            "requiredEmoteCount",
+            5);
+
+        try
+        {
+            var lockedResult = condition.Evaluate(
+                CreateContext(totalEmotesPerformed: 4),
+                new AchievementProgressState());
+
+            var unlockedResult = condition.Evaluate(
+                CreateContext(totalEmotesPerformed: 5),
+                new AchievementProgressState());
+
+            Assert.That(lockedResult.IsUnlocked, Is.False);
+            Assert.That(lockedResult.ProgressValue, Is.EqualTo(4));
+            Assert.That(lockedResult.UnlockProgressValue, Is.EqualTo(5));
+            Assert.That(unlockedResult.IsUnlocked, Is.True);
+            Assert.That(unlockedResult.ProgressValue, Is.EqualTo(5));
+            Assert.That(unlockedResult.UnlockProgressValue, Is.EqualTo(5));
+            Assert.That(condition.RelevantSignalKeys, Is.EqualTo(new[] { AchievementSignalKeys.EmotePerformed }));
+        }
+        finally
+        {
+            Object.DestroyImmediate(condition);
+        }
+    }
+
+    [Test]
     public void SceneVisitedCondition_UnlocksOnlyWhenRequiredSceneHasBeenVisited()
     {
         var condition = CreateCondition<SceneVisitedCondition>(
@@ -112,6 +143,7 @@ public class AchievementUnlockEvaluatorTests
     private static AchievementEvaluationContext CreateContext(
         int currentGoldOwned = 0,
         int totalGoldCollected = 0,
+        int totalEmotesPerformed = 0,
         string[] visitedSceneNames = null)
     {
         if (visitedSceneNames == null)
@@ -126,6 +158,7 @@ public class AchievementUnlockEvaluatorTests
         return new AchievementEvaluationContext(
             currentGoldOwned,
             totalGoldCollected,
+            totalEmotesPerformed,
             visitedSceneNames,
             mostRecentScene);
     }

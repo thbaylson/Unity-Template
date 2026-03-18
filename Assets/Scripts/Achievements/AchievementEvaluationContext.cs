@@ -6,17 +6,20 @@ public readonly struct AchievementEvaluationContext
     public AchievementEvaluationContext(
         int currentGoldOwned,
         int totalGoldCollected,
+        int totalEmotesPerformed,
         IReadOnlyCollection<string> visitedSceneNames,
         string mostRecentScene)
     {
         CurrentGoldOwned = currentGoldOwned;
         TotalGoldCollected = totalGoldCollected;
+        TotalEmotesPerformed = totalEmotesPerformed;
         VisitedSceneNames = visitedSceneNames;
         MostRecentScene = mostRecentScene;
     }
 
     public int CurrentGoldOwned { get; }
     public int TotalGoldCollected { get; }
+    public int TotalEmotesPerformed { get; }
     public IReadOnlyCollection<string> VisitedSceneNames { get; }
     public string MostRecentScene { get; }
 
