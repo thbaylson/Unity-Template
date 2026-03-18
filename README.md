@@ -41,6 +41,8 @@ Key dependencies from `Packages/manifest.json`:
 - When adding math-heavy logic, document calculations for clarity.
 - Use Play Mode to validate new interactions before committing.
 
+## Testing
+- **EditMode tests in the editor**: Open `Window > General > Test Runner`, switch to the `EditMode` tab, and run the suite.
 ## Credits
 - Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle
 - Sprites by SunGraphica: https://sungraphica.itch.io/
@@ -54,3 +56,4 @@ Key dependencies from `Packages/manifest.json`:
 - **Condition assets (`Assets/Scripts/Achievements/Conditions/`)**: Reusable `ScriptableObject` unlock logic so most new achievements only require data asset creation.
 - **Definitions path**: Add new assets under `Assets/Resources/Achievements/Definitions/` so they are discovered automatically.
 - **Player menu (`Assets/Scripts/Achievements/AchievementsMenuOverlay.cs`)**: Open the in-game achievements menu with `F8` or wire the optional pause menu button field.
+

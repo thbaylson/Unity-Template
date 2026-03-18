@@ -13,13 +13,17 @@ public class AchievementContainerUI : MonoBehaviour
 
     public void Initialize(AchievementDefinition achievement)
     {
-        var progressState = Services.AchievementService.GetProgress(achievement.Id);
+        var achievementService = Services.AchievementService;
+        var progressState = achievementService.GetProgress(achievement.Id);
         var isUnlocked = progressState != null && progressState.IsUnlocked;
+        var displayProgress = achievementService.GetDisplayProgress(achievement);
 
-        icon.sprite = progressState.IsUnlocked ? achievement.Icon : lockedIcon;
-        displayName.text = progressState.IsUnlocked ? achievement.DisplayName : "???";
-        description.text = achievement.Description;
-        flavorText.text = progressState.IsUnlocked ? achievement.FlavorText : "";
+        icon.sprite = isUnlocked ? achievement.Icon : lockedIcon;
+        displayName.text = isUnlocked ? achievement.DisplayName : "???";
+        description.text = AchievementProgressTextFormatter.BuildDescriptionText(
+            achievement.Description,
+            displayProgress);
+        flavorText.text = isUnlocked ? achievement.FlavorText : "";
 
         //lockedOverlay.gameObject.SetActive(!isUnlocked);
     }

@@ -7,6 +7,8 @@ namespace Template.Emotes
 {
     public class EmoteController : MonoBehaviour
     {
+        public static event System.Action<EmoteDefinition> EmotePlayed;
+
         [Header("Animator")]
         [SerializeField] private int baseLayerIndex = 0;
         [SerializeField] private int emoteLayerIndex = 1;
@@ -130,6 +132,8 @@ namespace Template.Emotes
             animator.SetLayerWeight(baseLayerIndex, 0f);
             animator.SetLayerWeight(emoteLayerIndex, 1f);
             animator.Play(emoteStateHash, emoteLayerIndex, 0f);
+
+            EmotePlayed?.Invoke(emote);
 
             if(!emote.IsLooping)
             {
