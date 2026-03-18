@@ -1,17 +1,20 @@
 using System;
 
-/// <summary>
-/// Publishes lightweight achievement-related progression signals so gameplay systems
-/// and reporter components can notify the achievement system.
-/// </summary>
-public static class AchievementSignalBus
+namespace Template.Achievements
 {
-    public static event Action<string> SignalRaised;
-
-    public static void Publish(string signalKey)
+    /// <summary>
+    /// Publishes lightweight achievement-related progression signals so gameplay systems
+    /// and reporter components can notify the achievement system.
+    /// </summary>
+    public static class AchievementSignalBus
     {
-        if (string.IsNullOrWhiteSpace(signalKey)) return;
+        public static event Action<string> SignalRaised;
 
-        SignalRaised?.Invoke(signalKey);
+        public static void Publish(string signalKey)
+        {
+            if (string.IsNullOrWhiteSpace(signalKey)) return;
+
+            SignalRaised?.Invoke(signalKey);
+        }
     }
 }

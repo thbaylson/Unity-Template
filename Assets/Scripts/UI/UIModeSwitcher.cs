@@ -2,80 +2,83 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.Scripting.APIUpdating;
 
 /// <summary>
 /// The class makes it so that using a controller within a UI element auto-hides the cursor. Attempting to use the 
 /// cursor will bring it back.
 /// </summary>
-public class UIModeSwitcher : MonoBehaviour
+namespace Template.UI
 {
-    [SerializeField] private GameObject pointerBlocker;
-
-    private InputSystemUIInputModule uiModule;
-
-    private void Awake()
+    [MovedFrom(true, null, "Assembly-CSharp", "UIModeSwitcher")]
+    public class UIModeSwitcher : MonoBehaviour
     {
-        if (EventSystem.current != null)
-        {
-            uiModule = EventSystem.current.GetComponent<InputSystemUIInputModule>();
-        }
-    }
+        [SerializeField] private GameObject pointerBlocker;
 
-    private void OnEnable()
-    {
-        if (uiModule == null) return;
+        private InputSystemUIInputModule uiModule;
 
-        if (uiModule.move?.action != null)
+        private void Awake()
         {
-            uiModule.move.action.performed += OnNavigate;
+            if (EventSystem.current != null)
+            {
+                uiModule = EventSystem.current.GetComponent<InputSystemUIInputModule>();
+            }
         }
 
-        if (uiModule.point?.action != null)
+        private void OnEnable()
         {
-            uiModule.point.action.performed += OnPointer;
+            if (uiModule == null) return;
+
+            if (uiModule.move?.action != null)
+            {
+                uiModule.move.action.performed += OnNavigate;
+            }
+
+            if (uiModule.point?.action != null)
+            {
+                uiModule.point.action.performed += OnPointer;
+            }
+
+            if (uiModule.leftClick?.action != null)
+            {
+                uiModule.leftClick.action.performed += OnPointer;
+            }
         }
 
-        if (uiModule.leftClick?.action != null)
+        private void OnDisable()
         {
-            uiModule.leftClick.action.performed += OnPointer;
+            if (uiModule == null) return;
+
+            if (uiModule.move?.action != null)
+            {
+                uiModule.move.action.performed -= OnNavigate;
+            }
+
+            if (uiModule.point?.action != null)
+            {
+                uiModule.point.action.performed -= OnPointer;
+            }
+
+            if (uiModule.leftClick?.action != null)
+            {
+                uiModule.leftClick.action.performed -= OnPointer;
+            }
         }
-    }
 
-
-    private void OnDisable()
-    {
-        if (uiModule == null) return;
-
-        if (uiModule.move?.action != null)
+        private void OnNavigate(InputAction.CallbackContext _)
         {
-            uiModule.move.action.performed -= OnNavigate;
+            BlockAndHideCursor(true);
         }
 
-        if (uiModule.point?.action != null)
+        private void OnPointer(InputAction.CallbackContext _)
         {
-            uiModule.point.action.performed -= OnPointer;
+            BlockAndHideCursor(false);
         }
 
-        if (uiModule.leftClick?.action != null)
+        private void BlockAndHideCursor(bool visible)
         {
-            uiModule.leftClick.action.performed -= OnPointer;
+            pointerBlocker.SetActive(visible);
+            Cursor.visible = !visible;
         }
-    }
-
-    private void OnNavigate(InputAction.CallbackContext _)
-    {
-        BlockAndHideCursor(true);
-    }
-
-    private void OnPointer(InputAction.CallbackContext _)
-    {
-        
-        BlockAndHideCursor(false);
-    }
-
-    private void BlockAndHideCursor(bool visible)
-    {
-        pointerBlocker.SetActive(visible);
-        Cursor.visible = !visible;
     }
 }

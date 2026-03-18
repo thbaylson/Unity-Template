@@ -1,7 +1,9 @@
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace Template.TransitionByName
+namespace Template
 {
+    [MovedFrom(true, "Template.TransitionByName", "Assembly-CSharp", "LevelTransition")]
     // Simple implementation for testing purposes.
     public class LevelTransition : MonoBehaviour
     {

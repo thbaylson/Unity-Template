@@ -1,27 +1,33 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Template.Services.Saving;
+using ServiceLocator = Template.Services.Services;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting.APIUpdating;
 
-public interface IAchievementService
+namespace Template.Achievements
 {
-    event Action<AchievementDefinition> AchievementUnlocked;
-    event Action AchievementsChanged;
+    public interface IAchievementService
+    {
+        event Action<AchievementDefinition> AchievementUnlocked;
+        event Action AchievementsChanged;
 
-    IReadOnlyList<AchievementDefinition> GetAllDefinitions();
-    AchievementProgressState GetProgress(string achievementId);
-    AchievementDisplayProgress GetDisplayProgress(AchievementDefinition definition);
-}
+        IReadOnlyList<AchievementDefinition> GetAllDefinitions();
+        AchievementProgressState GetProgress(string achievementId);
+        AchievementDisplayProgress GetDisplayProgress(AchievementDefinition definition);
+    }
 
-/// <summary>
-/// Tracks achievement progress and persists data in player save data.
-/// This service doesn't know about specific gameplay actions like gold collection.
-/// It listens to generic progression signals and evaluates only the affected achievements.
-/// </summary>
-public class AchievementService : MonoBehaviour, IAchievementService
-{
-    private const string DefinitionResourcesPath = "Achievements/";
+    /// <summary>
+    /// Tracks achievement progress and persists data in player save data.
+    /// This service doesn't know about specific gameplay actions like gold collection.
+    /// It listens to generic progression signals and evaluates only the affected achievements.
+    /// </summary>
+    [MovedFrom(true, null, "Assembly-CSharp", "AchievementService")]
+    public class AchievementService : MonoBehaviour, IAchievementService
+    {
+        private const string DefinitionResourcesPath = "Achievements/";
 
     public event Action<AchievementDefinition> AchievementUnlocked;
     public event Action AchievementsChanged;
@@ -37,13 +43,13 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
     private void Awake()
     {
-        if (Services.AchievementService != null)
+        if (ServiceLocator.AchievementService != null)
         {
             Destroy(gameObject);
             return;
         }
 
-        Services.AchievementService = this;
+        ServiceLocator.AchievementService = this;
 
         LoadDefinitions();
         BuildSignalIndex();
@@ -53,10 +59,10 @@ public class AchievementService : MonoBehaviour, IAchievementService
     {
         AchievementSignalBus.SignalRaised += OnSignalRaised;
 
-        if (Services.SaveService != null)
+        if (ServiceLocator.SaveService != null)
         {
-            Services.SaveService.GameLoaded += TryInitializeFromSaveData;
-            Services.SaveService.GameDeleted += TryInitializeFromSaveData;
+            ServiceLocator.SaveService.GameLoaded += TryInitializeFromSaveData;
+            ServiceLocator.SaveService.GameDeleted += TryInitializeFromSaveData;
         }
     }
 
@@ -64,10 +70,10 @@ public class AchievementService : MonoBehaviour, IAchievementService
     {
         AchievementSignalBus.SignalRaised -= OnSignalRaised;
 
-        if (Services.SaveService != null)
+        if (ServiceLocator.SaveService != null)
         {
-            Services.SaveService.GameLoaded -= TryInitializeFromSaveData;
-            Services.SaveService.GameDeleted -= TryInitializeFromSaveData;
+            ServiceLocator.SaveService.GameLoaded -= TryInitializeFromSaveData;
+            ServiceLocator.SaveService.GameDeleted -= TryInitializeFromSaveData;
         }
     }
 
@@ -115,7 +121,7 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
     private void TryInitializeFromSaveData()
     {
-        var playerData = Services.SaveService?.GameDataCache?.Player;
+        var playerData = ServiceLocator.SaveService?.GameDataCache?.Player;
         if (playerData == null) return;
 
         BuildProgressFromPlayerData(playerData);
@@ -249,7 +255,7 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
     private bool TryBuildEvaluationContext(out AchievementEvaluationContext evaluationContext)
     {
-        var playerData = Services.SaveService?.GameDataCache?.Player;
+        var playerData = ServiceLocator.SaveService?.GameDataCache?.Player;
         if (playerData == null)
         {
             evaluationContext = default;
@@ -304,23 +310,24 @@ public class AchievementService : MonoBehaviour, IAchievementService
 
         if (hasAnyProgressUpdates)
         {
-            Services.SaveService?.MarkGameDirty();
+            ServiceLocator.SaveService?.MarkGameDirty();
         }
 
         AchievementsChanged?.Invoke();
     }
 
-    private void Unlock(
-        AchievementDefinition definition,
-        AchievementProgressState progressState,
-        int unlockProgressValue)
-    {
-        progressState.IsUnlocked = true;
-        progressState.CurrentProgressValue = unlockProgressValue;
-        progressState.UnlockedUnixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        private void Unlock(
+            AchievementDefinition definition,
+            AchievementProgressState progressState,
+            int unlockProgressValue)
+        {
+            progressState.IsUnlocked = true;
+            progressState.CurrentProgressValue = unlockProgressValue;
+            progressState.UnlockedUnixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        Services.SaveService?.MarkGameDirty();
-        AchievementUnlocked?.Invoke(definition);
-        Debug.Log($"Achievement unlocked: {definition.DisplayName}");
+            ServiceLocator.SaveService?.MarkGameDirty();
+            AchievementUnlocked?.Invoke(definition);
+            Debug.Log($"Achievement unlocked: {definition.DisplayName}");
+        }
     }
 }

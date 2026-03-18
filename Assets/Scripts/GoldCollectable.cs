@@ -1,37 +1,42 @@
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-public class GoldCollectable : LevelFlaggable
+namespace Template
 {
-    [SerializeField] private int amount = 1;
-    private bool collected = false;
-
-    void OnTriggerEnter(Collider other)
+    [MovedFrom(true, null, "Assembly-CSharp", "GoldCollectable")]
+    public class GoldCollectable : LevelFlaggable
     {
-        var collect = other.GetComponentInChildren<GoldCollector>();
-        if(collect != null)
+        [SerializeField] private int amount = 1;
+        private bool collected = false;
+
+        void OnTriggerEnter(Collider other)
         {
-            collect.CollectGold(amount);
-            collected = true;
-            Despawn();
+            var collect = other.GetComponentInChildren<GoldCollector>();
+            if (collect != null)
+            {
+                collect.CollectGold(amount);
+                collected = true;
+                Despawn();
+            }
         }
-    }
 
-    void Despawn()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public override bool GetFlag()
-    {
-        return collected;
-    }
-
-    public override void ApplyFlag(bool value)
-    {
-        collected = value;
-        if (collected)
+        void Despawn()
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
+        }
+
+        public override bool GetFlag()
+        {
+            return collected;
+        }
+
+        public override void ApplyFlag(bool value)
+        {
+            collected = value;
+            if (collected)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

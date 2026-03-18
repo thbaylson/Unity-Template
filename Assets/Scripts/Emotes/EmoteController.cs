@@ -1,6 +1,7 @@
 using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
+using ServiceLocator = Template.Services.Services;
 using UnityEngine;
 
 namespace Template.Emotes
@@ -106,7 +107,7 @@ namespace Template.Emotes
                 return false;
             }
 
-            if (Services.PauseService?.IsPaused ?? false)
+            if (ServiceLocator.PauseService?.IsPaused ?? false)
             {
                 return false;
             }

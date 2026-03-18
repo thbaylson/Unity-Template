@@ -1,24 +1,29 @@
-public static class AchievementProgressTextFormatter
+using Template.Achievements;
+
+namespace Template.UI
 {
-    private const string ProgressTextColor = "#BFBFBF";
-
-    public static string BuildDescriptionText(string description, AchievementDisplayProgress progress)
+    public static class AchievementProgressTextFormatter
     {
-        var safeDescription = description ?? string.Empty;
+        private const string ProgressTextColor = "#BFBFBF";
 
-        if (progress.IsUnlocked || progress.TargetProgressValue <= 1)
+        public static string BuildDescriptionText(string description, AchievementDisplayProgress progress)
         {
-            return safeDescription;
+            var safeDescription = description ?? string.Empty;
+
+            if (progress.IsUnlocked || progress.TargetProgressValue <= 1)
+            {
+                return safeDescription;
+            }
+
+            var progressLine =
+                $"<size=24><color={ProgressTextColor}>Progress: {progress.CurrentProgressValue} / {progress.TargetProgressValue}</color></size>";
+
+            if (string.IsNullOrWhiteSpace(safeDescription))
+            {
+                return progressLine;
+            }
+
+            return $"{safeDescription}\n{progressLine}";
         }
-
-        var progressLine =
-            $"<size=24><color={ProgressTextColor}>Progress: {progress.CurrentProgressValue} / {progress.TargetProgressValue}</color></size>";
-
-        if (string.IsNullOrWhiteSpace(safeDescription))
-        {
-            return progressLine;
-        }
-
-        return $"{safeDescription}\n{progressLine}";
     }
 }

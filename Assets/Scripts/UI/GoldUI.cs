@@ -1,37 +1,42 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-public class GoldUI : MonoBehaviour
+namespace Template.UI
 {
-    public static GoldUI Instance { get; private set; }
-
-    [SerializeField] private TextMeshProUGUI amountText;
-
-    private void Awake()
+    [MovedFrom(true, null, "Assembly-CSharp", "GoldUI")]
+    public class GoldUI : MonoBehaviour
     {
-        if (Instance != null && Instance != this)
+        public static GoldUI Instance { get; private set; }
+
+        [SerializeField] private TextMeshProUGUI amountText;
+
+        private void Awake()
         {
-            Destroy(gameObject);
-            return;
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
         }
 
-        Instance = this;
-    }
+        private void OnEnable()
+        {
+            GoldCollector.OnGoldChanged += HandleCoinsChanged;
+            GoldCollector.OnStateRefresh += HandleCoinsChanged;
+        }
 
-    private void OnEnable()
-    {
-        GoldCollector.OnGoldChanged += HandleCoinsChanged;
-        GoldCollector.OnStateRefresh += HandleCoinsChanged;
-    }
+        private void OnDisable()
+        {
+            GoldCollector.OnGoldChanged -= HandleCoinsChanged;
+            GoldCollector.OnStateRefresh -= HandleCoinsChanged;
+        }
 
-    private void OnDisable()
-    {
-        GoldCollector.OnGoldChanged -= HandleCoinsChanged;
-        GoldCollector.OnStateRefresh -= HandleCoinsChanged;
-    }
-
-    private void HandleCoinsChanged(int amount)
-    {
-        amountText.text = $"COINS: {amount:d2}";
+        private void HandleCoinsChanged(int amount)
+        {
+            amountText.text = $"COINS: {amount:d2}";
+        }
     }
 }

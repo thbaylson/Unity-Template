@@ -1,28 +1,33 @@
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-public class UILayerAttachment : MonoBehaviour
+namespace Template.UI
 {
-    [SerializeField] private UiLayer layer = UiLayer.Hud;
-    private bool isAttached = false;
-
-    private void Awake()
+    [MovedFrom(true, null, "Assembly-CSharp", "UILayerAttachment")]
+    public class UILayerAttachment : MonoBehaviour
     {
-        if (!isAttached)
-        {
-            AttachToLayer();
-        }
-    }
+        [SerializeField] private UiLayer layer = UiLayer.Hud;
+        private bool isAttached = false;
 
-    public void AttachToLayer()
-    {
-        if (UIService.Instance != null)
+        private void Awake()
         {
-            UIService.Instance.AttachToLayer(transform, layer);
-            isAttached = true;
+            if (!isAttached)
+            {
+                AttachToLayer();
+            }
         }
-        else
+
+        public void AttachToLayer()
         {
-            Debug.LogError($"UILayerAttachment on {name}: cannot attach to layer {layer} because UIManager is not available.");
+            if (UIService.Instance != null)
+            {
+                UIService.Instance.AttachToLayer(transform, layer);
+                isAttached = true;
+            }
+            else
+            {
+                Debug.LogError($"UILayerAttachment on {name}: cannot attach to layer {layer} because UIManager is not available.");
+            }
         }
     }
 }

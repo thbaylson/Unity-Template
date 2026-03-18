@@ -1,13 +1,16 @@
-public readonly struct AchievementDisplayProgress
+namespace Template.Achievements
 {
-    public AchievementDisplayProgress(bool isUnlocked, int currentProgressValue, int targetProgressValue)
+    public readonly struct AchievementDisplayProgress
     {
-        IsUnlocked = isUnlocked;
-        CurrentProgressValue = currentProgressValue;
-        TargetProgressValue = targetProgressValue;
-    }
+        public AchievementDisplayProgress(bool isUnlocked, int currentProgressValue, int targetProgressValue)
+        {
+            IsUnlocked = isUnlocked;
+            CurrentProgressValue = currentProgressValue;
+            TargetProgressValue = targetProgressValue;
+        }
 
-    public bool IsUnlocked { get; }
-    public int CurrentProgressValue { get; }
-    public int TargetProgressValue { get; }
+        public bool IsUnlocked { get; }
+        public int CurrentProgressValue { get; }
+        public int TargetProgressValue { get; }
+    }
 }
