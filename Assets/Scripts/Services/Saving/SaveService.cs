@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -5,8 +6,10 @@ using UnityEngine.SceneManagement;
 public interface ISaveService
 {
     GameDataCache GameDataCache { get; }
-
     bool IsGameDirty { get; }
+
+    event Action GameLoaded;
+    event Action GameDeleted;
 
     void MarkGameDirty();
 
@@ -29,10 +32,14 @@ public class SaveService : MonoBehaviour, ISaveService
 
     public GameDataCache GameDataCache { get; private set; } = new GameDataCache();
     public bool IsGameDirty { get; private set; }
+    
+    public event Action GameLoaded;
+    public event Action GameDeleted;
 
     // Self-registered flaggables, grouped by scene name.
     private readonly Dictionary<string, HashSet<ILevelFlaggable>> _levelFlaggablesByScene
         = new Dictionary<string, HashSet<ILevelFlaggable>>();
+
 
     private void Awake()
     {
@@ -112,11 +119,17 @@ public class SaveService : MonoBehaviour, ISaveService
 
             // Apply for currently active scene(s)
             ApplyFlagsForScene(SceneManager.GetActiveScene().name);
+            Debug.Log("Game loaded successfully.");
         }
         catch
         {
             GameDataCache = new GameDataCache();
             IsGameDirty = true;
+            Debug.Log("Game load failed.");
+        }
+        finally
+        {
+            GameLoaded?.Invoke();
         }
     }
 
@@ -163,6 +176,7 @@ public class SaveService : MonoBehaviour, ISaveService
         GameDataCache = new GameDataCache();
 
         IsGameDirty = false;
+        GameDeleted?.Invoke();
     }
 
     /// <summary>Flaggables call this on enable.</summary>

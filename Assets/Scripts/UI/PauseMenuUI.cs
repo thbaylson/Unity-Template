@@ -15,10 +15,16 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button saveButton;
     [SerializeField] private Button settingsButton;
+    [SerializeField] private Button achievementsButton;
     [SerializeField] private Button returnToTitleButton;
+
+    [Header("Subscreens")]
+    [SerializeField] private GameObject achievementsSubscreen;
 
     [Header("Scene Target")]
     [SerializeField] private string titleSceneName = "Title";
+
+    private GameObject achievementsScreenInstance;
 
     private void Awake()
     {
@@ -37,6 +43,7 @@ public class PauseMenuUI : MonoBehaviour
         if (returnToTitleButton) returnToTitleButton.onClick.AddListener(ReturnToTitle);
         if (saveButton) saveButton.onClick.AddListener(Save);
         if (settingsButton) settingsButton.onClick.AddListener(Settings);
+        if (achievementsButton) achievementsButton.onClick.AddListener(Achievements);
     }
 
     public void Resume()
@@ -56,11 +63,25 @@ public class PauseMenuUI : MonoBehaviour
         Services.PauseService?.SetPaused(false);
     }
 
+    // TODO: Make this a subscreen like the achievements.
     public void Settings()
     {
         Services.PauseService?.SetUIFocus(false);
         UIService.Instance.ShowSettings(onBack: HandleFocusReturned);
         SetVisible(false);
+    }
+
+    public void Achievements()
+    {
+        if (achievementsScreenInstance == null)
+        {
+            achievementsScreenInstance = Instantiate(achievementsSubscreen, transform);
+        }
+
+        Services.PauseService?.SetUIFocus(false);
+        SetVisible(false);
+        // TODO: Make ISubscreen interface with Open and Close methods.
+        achievementsScreenInstance.GetComponent<AchievementUI>().Open(onClose: HandleFocusReturned);
     }
 
     public void SetVisible(bool paused)

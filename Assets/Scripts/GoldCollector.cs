@@ -7,6 +7,8 @@ public class GoldCollector : MonoBehaviour
     public static event Action<int> OnGoldChanged;
     public static event Action<int> OnStateRefresh;
 
+    public static event Action<int, int> OnGoldCollected;
+
     public int Gold { get; private set; }
 
     private void Start()
@@ -27,10 +29,17 @@ public class GoldCollector : MonoBehaviour
 
     public void CollectGold(int amount)
     {
+        if (amount <= 0) return;
+
         Gold += amount;
 
-        Services.SaveService.GameDataCache.Player.GoldAmount = Gold;
+        var playerData = Services.SaveService.GameDataCache.Player;
+        playerData.GoldAmount = Gold;
+        playerData.TotalGoldCollected += amount;
+
         Services.SaveService.MarkGameDirty();
+
+        OnGoldCollected?.Invoke(amount, Gold);
         OnGoldChanged?.Invoke(Gold);
     }
 

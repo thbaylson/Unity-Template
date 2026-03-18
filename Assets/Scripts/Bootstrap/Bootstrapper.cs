@@ -35,7 +35,10 @@ public class Bootstrapper : MonoBehaviour
 
     private void Start()
     {
+        // This supports developers starting Play Mode from any scene, but won't affect real players.
+#if UNITY_EDITOR
         Services.SaveService?.LoadGame();
+#endif
 
         // The Bootstrap scene is loaded additively at runtime AFTER
         // the scene that was run from the editor.

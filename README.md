@@ -42,4 +42,15 @@ Key dependencies from `Packages/manifest.json`:
 - Use Play Mode to validate new interactions before committing.
 
 ## Credits
-- Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle 
+- Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle
+- Sprites by SunGraphica: https://sungraphica.itch.io/
+
+## Supplemental design docs
+- `Docs/AchievementsSystemPlan.md` — implementation plan for an in-game, data-driven achievements system.
+
+## Achievements system
+- **Runtime service (`Assets/Scripts/Achievements/AchievementService.cs`)**: Tracks unlock progress, syncs with save data, and emits unlock/change events. Instantiated from `Assets/Prefabs/AchievementService.prefab` via `Assets/Resources/Config/BootstrapConfig.asset`.
+- **Authoring asset (`Assets/Scripts/Achievements/AchievementDefinition.cs`)**: Create achievement definitions with icon, name, description, flavor text, and a pluggable unlock-condition asset reference.
+- **Condition assets (`Assets/Scripts/Achievements/Conditions/`)**: Reusable `ScriptableObject` unlock logic so most new achievements only require data asset creation.
+- **Definitions path**: Add new assets under `Assets/Resources/Achievements/Definitions/` so they are discovered automatically.
+- **Player menu (`Assets/Scripts/Achievements/AchievementsMenuOverlay.cs`)**: Open the in-game achievements menu with `F8` or wire the optional pause menu button field.
