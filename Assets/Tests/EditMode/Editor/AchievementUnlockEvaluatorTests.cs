@@ -1,5 +1,7 @@
 using System.Reflection;
 using NUnit.Framework;
+using Template.Achievements;
+using Template.Achievements.Conditions;
 using UnityEngine;
 
 /// <summary>

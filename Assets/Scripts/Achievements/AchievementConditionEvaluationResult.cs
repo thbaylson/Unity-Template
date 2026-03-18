@@ -1,13 +1,16 @@
-public readonly struct AchievementConditionEvaluationResult
+namespace Template.Achievements
 {
-    public AchievementConditionEvaluationResult(bool isUnlocked, int progressValue, int unlockProgressValue)
+    public readonly struct AchievementConditionEvaluationResult
     {
-        IsUnlocked = isUnlocked;
-        ProgressValue = progressValue;
-        UnlockProgressValue = unlockProgressValue;
-    }
+        public AchievementConditionEvaluationResult(bool isUnlocked, int progressValue, int unlockProgressValue)
+        {
+            IsUnlocked = isUnlocked;
+            ProgressValue = progressValue;
+            UnlockProgressValue = unlockProgressValue;
+        }
 
-    public bool IsUnlocked { get; }
-    public int ProgressValue { get; }
-    public int UnlockProgressValue { get; }
+        public bool IsUnlocked { get; }
+        public int ProgressValue { get; }
+        public int UnlockProgressValue { get; }
+    }
 }

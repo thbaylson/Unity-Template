@@ -1,32 +1,38 @@
 using Template.Emotes;
+using ServiceLocator = Template.Services.Services;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-/// <summary>
-/// Listens for successful emote plays, updates save-backed progression, and
-/// publishes the generic achievement signal for emote-based achievements.
-/// </summary>
-public class EmoteAchievementSignalReporter : MonoBehaviour
+namespace Template.Achievements.SignalReporters
 {
-    private void OnEnable()
+    /// <summary>
+    /// Listens for successful emote plays, updates save-backed progression, and
+    /// publishes the generic achievement signal for emote-based achievements.
+    /// </summary>
+    [MovedFrom(true, null, "Assembly-CSharp", "EmoteAchievementSignalReporter")]
+    public class EmoteAchievementSignalReporter : MonoBehaviour
     {
-        EmoteController.EmotePlayed += OnEmotePlayed;
-    }
-
-    private void OnDisable()
-    {
-        EmoteController.EmotePlayed -= OnEmotePlayed;
-    }
-
-    private static void OnEmotePlayed(EmoteDefinition emote)
-    {
-        var playerData = Services.SaveService?.GameDataCache?.Player;
-        if (playerData == null)
+        private void OnEnable()
         {
-            return;
+            EmoteController.EmotePlayed += OnEmotePlayed;
         }
 
-        playerData.TotalEmotesPerformed += 1;
-        Services.SaveService?.MarkGameDirty();
-        AchievementSignalBus.Publish(AchievementSignalKeys.EmotePerformed);
+        private void OnDisable()
+        {
+            EmoteController.EmotePlayed -= OnEmotePlayed;
+        }
+
+        private static void OnEmotePlayed(EmoteDefinition emote)
+        {
+            var playerData = ServiceLocator.SaveService?.GameDataCache?.Player;
+            if (playerData == null)
+            {
+                return;
+            }
+
+            playerData.TotalEmotesPerformed += 1;
+            ServiceLocator.SaveService?.MarkGameDirty();
+            AchievementSignalBus.Publish(AchievementSignalKeys.EmotePerformed);
+        }
     }
 }

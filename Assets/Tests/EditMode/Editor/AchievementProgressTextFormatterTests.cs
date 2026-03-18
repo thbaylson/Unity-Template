@@ -1,4 +1,6 @@
 using NUnit.Framework;
+using Template.Achievements;
+using Template.UI;
 
 /// <summary>
 /// Verifies achievement menu progress formatting without requiring scene or UI setup.

@@ -2,30 +2,34 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting.APIUpdating;
 
-public interface ISaveService
+namespace Template.Services.Saving
 {
-    GameDataCache GameDataCache { get; }
-    bool IsGameDirty { get; }
+    public interface ISaveService
+    {
+        GameDataCache GameDataCache { get; }
+        bool IsGameDirty { get; }
 
-    event Action GameLoaded;
-    event Action GameDeleted;
+        event Action GameLoaded;
+        event Action GameDeleted;
 
-    void MarkGameDirty();
+        void MarkGameDirty();
 
-    void Register(ILevelFlaggable levelFlaggable);
-    void SetGameDataCacheFlag(string name, string id, bool value);
+        void Register(ILevelFlaggable levelFlaggable);
+        void SetGameDataCacheFlag(string name, string id, bool value);
 
-    void LoadGame();
-    bool LoadGameExists();
-    void SaveGame();
-    void DeleteGame();
-}
+        void LoadGame();
+        bool LoadGameExists();
+        void SaveGame();
+        void DeleteGame();
+    }
 
-public class SaveService : MonoBehaviour, ISaveService
-{
-    private ISaveStorage _storage;
-    private ISaveSerializer _serializer;
+    [MovedFrom(true, null, "Assembly-CSharp", "SaveService")]
+    public class SaveService : MonoBehaviour, ISaveService
+    {
+        private ISaveStorage _storage;
+        private ISaveSerializer _serializer;
 
     [SerializeField] private string gameFileName = "game.json";
     [SerializeField] private int gameSchemaVersion = 1;
@@ -265,10 +269,11 @@ public class SaveService : MonoBehaviour, ISaveService
         return map.TryGetValue(id, out value);
     }
 
-    private static string GetFlaggableSceneName(ILevelFlaggable flaggable)
-    {
-        if (flaggable is MonoBehaviour mb) return mb.gameObject.scene.name;
+        private static string GetFlaggableSceneName(ILevelFlaggable flaggable)
+        {
+            if (flaggable is MonoBehaviour mb) return mb.gameObject.scene.name;
 
-        return SceneManager.GetActiveScene().name;
+            return SceneManager.GetActiveScene().name;
+        }
     }
 }
