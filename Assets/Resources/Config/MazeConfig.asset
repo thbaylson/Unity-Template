@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: MazeConfig
   m_EditorClassIdentifier: 
   algorithmKind: 0
-  width: 3
-  height: 3
+  width: 4
+  height: 4
   cellSize: 6
   floorThickness: 0.25
   wallThickness: 0.45
