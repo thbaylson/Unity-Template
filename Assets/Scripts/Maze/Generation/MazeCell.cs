@@ -12,12 +12,17 @@ namespace Template.Maze.Generation
         {
             return new MazeCell
             {
-                HasFloor = true,
+                HasFloor = false,
                 HasNorthWall = true,
                 HasEastWall = true,
                 HasSouthWall = true,
                 HasWestWall = true
             };
+        }
+
+        public void SetFloor(bool hasFloor)
+        {
+            HasFloor = hasFloor;
         }
 
         public bool HasWall(MazeWallDirection direction)

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92d2b5f01e68b93478e13bca3094d4ab, type: 3}
   m_Name: MazeConfig
   m_EditorClassIdentifier: 
-  algorithmKind: 0
-  width: 4
-  height: 4
+  algorithmKind: 2
+  width: 25
+  height: 25
   cellSize: 6
   floorThickness: 0.25
   wallThickness: 0.45

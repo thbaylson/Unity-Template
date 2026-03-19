@@ -33,13 +33,39 @@ namespace Template.Maze
 
         private void Start()
         {
-            if (_generator == null)
+            if (!TryRefreshGenerator())
             {
-                Debug.LogError("MazeManager could not create a maze generation algorithm.", this);
                 return;
             }
 
             BuildMaze();
+        }
+
+        [ContextMenu("Generate New Maze")]
+        private void GenerateNewMazeFromContextMenu()
+        {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning("Generate New Maze is only available while the game is running.", this);
+                return;
+            }
+
+            if (!TryRefreshGenerator())
+            {
+                return;
+            }
+
+            var mazeSaveService = ServiceLocator.MazeSaveService;
+            if (mazeSaveService == null)
+            {
+                Debug.LogError("MazeManager requires the MazeSaveService to generate a new maze.", this);
+                return;
+            }
+
+            var session = mazeSaveService.PrepareNewMaze(config);
+            BuildMaze(session);
+            PlayerManager.Instance?.TeleportPlayer(config.GetMazeEntrySpawnPosition());
+            Debug.Log($"MazeManager generated a new maze with seed {session.Seed}.", this);
         }
 
         private void BuildMaze()
@@ -51,7 +77,11 @@ namespace Template.Maze
                 return;
             }
 
-            var session = mazeSaveService.PrepareMazeForEntry(config);
+            BuildMaze(mazeSaveService.PrepareMazeForEntry(config));
+        }
+
+        private void BuildMaze(MazeSessionState session)
+        {
             var layout = _generator.Generate(new MazeGenerationRequest(config.Width, config.Height, session.Seed));
 
             RebuildRuntimeRoot();
@@ -67,11 +97,38 @@ namespace Template.Maze
             BuildCoins(layout, session.Seed, session.CollectedCoinIds, coinsRoot);
         }
 
+        private bool TryRefreshGenerator()
+        {
+            if (config == null)
+            {
+                Debug.LogError("MazeManager is missing a MazeConfig reference.", this);
+                return false;
+            }
+
+            _generator = MazeGeneratorFactory.Create(config.AlgorithmKind);
+            if (_generator != null)
+            {
+                return true;
+            }
+
+            Debug.LogError("MazeManager could not create a maze generation algorithm.", this);
+            return false;
+        }
+
         private void RebuildRuntimeRoot()
         {
             if (_runtimeRoot != null)
             {
-                Destroy(_runtimeRoot.gameObject);
+#if UNITY_EDITOR
+                if (Application.isPlaying)
+                {
+                    DestroyImmediate(_runtimeRoot.gameObject);
+                }
+                else
+#endif
+                {
+                    Destroy(_runtimeRoot.gameObject);
+                }
             }
 
             var root = new GameObject("MazeRuntime");
@@ -88,16 +145,8 @@ namespace Template.Maze
 
         private void BuildFloors(MazeLayout layout, Transform parent)
         {
-            var size = new Vector3(
-                layout.Width * config.CellSize,
-                config.FloorThickness,
-                layout.Height * config.CellSize);
-            var center = config.MazeOrigin + new Vector3(
-                ((layout.Width - 1) * config.CellSize) * 0.5f,
-                -(config.FloorThickness * 0.5f),
-                ((layout.Height - 1) * config.CellSize) * 0.5f);
-
-            CreateCube("Floor", size, center, config.FloorMaterial, parent);
+            var floorSegments = CollectFloorSegments(layout);
+            CreateCombinedCubes("Floors", floorSegments, config.FloorMaterial, parent);
         }
 
         private void BuildWalls(MazeLayout layout, Transform parent)
@@ -210,12 +259,14 @@ namespace Template.Maze
         private List<MazeCoordinate> GetCoinCandidateCells(MazeLayout layout)
         {
             var cells = new List<MazeCoordinate>();
+            var distances = MazeGenerationUtility.BuildDistanceGrid(layout);
 
             for (var x = 0; x < layout.Width; x++)
             {
                 for (var y = 0; y < layout.Height; y++)
                 {
                     var coordinate = new MazeCoordinate(x, y);
+                    if (distances[x, y] < 0) continue;
                     if (coordinate.Equals(layout.StartCoordinate)) continue;
                     if (coordinate.Equals(layout.ExitCoordinate)) continue;
 
@@ -242,6 +293,76 @@ namespace Template.Maze
                 center.z + jitterZ);
         }
 
+        private List<BoxPrimitiveSpec> CollectFloorSegments(MazeLayout layout)
+        {
+            var segments = new List<BoxPrimitiveSpec>();
+            var consumed = new bool[layout.Width, layout.Height];
+            var floorCenterY = config.MazeOrigin.y - (config.FloorThickness * 0.5f);
+
+            for (var y = 0; y < layout.Height; y++)
+            {
+                for (var x = 0; x < layout.Width; x++)
+                {
+                    var coordinate = new MazeCoordinate(x, y);
+                    if (consumed[x, y]) continue;
+                    if (!layout.HasFloor(coordinate)) continue;
+
+                    var rectangleWidth = 0;
+                    while (x + rectangleWidth < layout.Width)
+                    {
+                        var nextCoordinate = new MazeCoordinate(x + rectangleWidth, y);
+                        if (consumed[nextCoordinate.X, nextCoordinate.Y]) break;
+                        if (!layout.HasFloor(nextCoordinate)) break;
+
+                        rectangleWidth++;
+                    }
+
+                    var rectangleHeight = 1;
+                    var canGrow = true;
+                    while (y + rectangleHeight < layout.Height && canGrow)
+                    {
+                        for (var widthIndex = 0; widthIndex < rectangleWidth; widthIndex++)
+                        {
+                            var nextCoordinate = new MazeCoordinate(x + widthIndex, y + rectangleHeight);
+                            if (consumed[nextCoordinate.X, nextCoordinate.Y] || !layout.HasFloor(nextCoordinate))
+                            {
+                                canGrow = false;
+                                break;
+                            }
+                        }
+
+                        if (canGrow)
+                        {
+                            rectangleHeight++;
+                        }
+                    }
+
+                    for (var offsetY = 0; offsetY < rectangleHeight; offsetY++)
+                    {
+                        for (var offsetX = 0; offsetX < rectangleWidth; offsetX++)
+                        {
+                            consumed[x + offsetX, y + offsetY] = true;
+                        }
+                    }
+
+                    var startCenter = GetCellCenter(coordinate);
+                    var endCenter = GetCellCenter(new MazeCoordinate(x + rectangleWidth - 1, y + rectangleHeight - 1));
+                    var position = new Vector3(
+                        (startCenter.x + endCenter.x) * 0.5f,
+                        floorCenterY,
+                        (startCenter.z + endCenter.z) * 0.5f);
+
+                    segments.Add(new BoxPrimitiveSpec(
+                        $"Floor_{x}_{y}",
+                        new Vector3(rectangleWidth * config.CellSize, config.FloorThickness, rectangleHeight * config.CellSize),
+                        position,
+                        Quaternion.identity));
+                }
+            }
+
+            return segments;
+        }
+
         private List<BoxPrimitiveSpec> CollectWallSegments(MazeLayout layout)
         {
             var segments = new List<BoxPrimitiveSpec>();
@@ -254,14 +375,14 @@ namespace Template.Maze
                 while (x < layout.Width)
                 {
                     var coordinate = new MazeCoordinate(x, y);
-                    if (!layout.HasWall(coordinate, MazeWallDirection.North))
+                    if (!ShouldRenderWall(layout, coordinate, MazeWallDirection.North))
                     {
                         x++;
                         continue;
                     }
 
                     var runStart = x;
-                    while (x < layout.Width && layout.HasWall(new MazeCoordinate(x, y), MazeWallDirection.North))
+                    while (x < layout.Width && ShouldRenderWall(layout, new MazeCoordinate(x, y), MazeWallDirection.North))
                     {
                         x++;
                     }
@@ -282,35 +403,34 @@ namespace Template.Maze
                 }
             }
 
-            if (layout.Height > 0)
+            for (var y = 0; y < layout.Height; y++)
             {
-                var boundaryY = layout.Height - 1;
                 var x = 0;
                 while (x < layout.Width)
                 {
-                    var coordinate = new MazeCoordinate(x, boundaryY);
-                    if (!layout.HasWall(coordinate, MazeWallDirection.South))
+                    var coordinate = new MazeCoordinate(x, y);
+                    if (!ShouldRenderBoundaryWall(layout, coordinate, MazeWallDirection.South))
                     {
                         x++;
                         continue;
                     }
 
                     var runStart = x;
-                    while (x < layout.Width && layout.HasWall(new MazeCoordinate(x, boundaryY), MazeWallDirection.South))
+                    while (x < layout.Width && ShouldRenderBoundaryWall(layout, new MazeCoordinate(x, y), MazeWallDirection.South))
                     {
                         x++;
                     }
 
                     var runLength = x - runStart;
-                    var startCenter = GetCellCenter(new MazeCoordinate(runStart, boundaryY));
-                    var endCenter = GetCellCenter(new MazeCoordinate(x - 1, boundaryY));
+                    var startCenter = GetCellCenter(new MazeCoordinate(runStart, y));
+                    var endCenter = GetCellCenter(new MazeCoordinate(x - 1, y));
                     var position = new Vector3(
                         (startCenter.x + endCenter.x) * 0.5f,
                         wallCenterHeight,
                         startCenter.z + halfCell);
 
                     segments.Add(new BoxPrimitiveSpec(
-                        $"SouthWallRun_{runStart}_{boundaryY}",
+                        $"SouthWallRun_{runStart}_{y}",
                         new Vector3((runLength * config.CellSize) + config.WallThickness, config.WallHeight, config.WallThickness),
                         position,
                         Quaternion.identity));
@@ -323,14 +443,14 @@ namespace Template.Maze
                 while (y < layout.Height)
                 {
                     var coordinate = new MazeCoordinate(x, y);
-                    if (!layout.HasWall(coordinate, MazeWallDirection.West))
+                    if (!ShouldRenderWall(layout, coordinate, MazeWallDirection.West))
                     {
                         y++;
                         continue;
                     }
 
                     var runStart = y;
-                    while (y < layout.Height && layout.HasWall(new MazeCoordinate(x, y), MazeWallDirection.West))
+                    while (y < layout.Height && ShouldRenderWall(layout, new MazeCoordinate(x, y), MazeWallDirection.West))
                     {
                         y++;
                     }
@@ -351,35 +471,34 @@ namespace Template.Maze
                 }
             }
 
-            if (layout.Width > 0)
+            for (var x = 0; x < layout.Width; x++)
             {
-                var boundaryX = layout.Width - 1;
                 var y = 0;
                 while (y < layout.Height)
                 {
-                    var coordinate = new MazeCoordinate(boundaryX, y);
-                    if (!layout.HasWall(coordinate, MazeWallDirection.East))
+                    var coordinate = new MazeCoordinate(x, y);
+                    if (!ShouldRenderBoundaryWall(layout, coordinate, MazeWallDirection.East))
                     {
                         y++;
                         continue;
                     }
 
                     var runStart = y;
-                    while (y < layout.Height && layout.HasWall(new MazeCoordinate(boundaryX, y), MazeWallDirection.East))
+                    while (y < layout.Height && ShouldRenderBoundaryWall(layout, new MazeCoordinate(x, y), MazeWallDirection.East))
                     {
                         y++;
                     }
 
                     var runLength = y - runStart;
-                    var startCenter = GetCellCenter(new MazeCoordinate(boundaryX, runStart));
-                    var endCenter = GetCellCenter(new MazeCoordinate(boundaryX, y - 1));
+                    var startCenter = GetCellCenter(new MazeCoordinate(x, runStart));
+                    var endCenter = GetCellCenter(new MazeCoordinate(x, y - 1));
                     var position = new Vector3(
                         startCenter.x + halfCell,
                         wallCenterHeight,
                         (startCenter.z + endCenter.z) * 0.5f);
 
                     segments.Add(new BoxPrimitiveSpec(
-                        $"EastWallRun_{boundaryX}_{runStart}",
+                        $"EastWallRun_{x}_{runStart}",
                         new Vector3(config.WallThickness, config.WallHeight, (runLength * config.CellSize) + config.WallThickness),
                         position,
                         Quaternion.identity));
@@ -387,6 +506,43 @@ namespace Template.Maze
             }
 
             return segments;
+        }
+
+        private static bool ShouldRenderWall(MazeLayout layout, MazeCoordinate coordinate, MazeWallDirection direction)
+        {
+            if (!layout.HasFloor(coordinate))
+            {
+                return false;
+            }
+
+            var neighbor = coordinate + MazeDirectionUtility.GetOffset(direction);
+            if (!layout.Contains(neighbor))
+            {
+                return layout.HasWall(coordinate, direction);
+            }
+
+            if (!layout.HasFloor(neighbor))
+            {
+                return true;
+            }
+
+            return layout.HasWall(coordinate, direction);
+        }
+
+        private static bool ShouldRenderBoundaryWall(MazeLayout layout, MazeCoordinate coordinate, MazeWallDirection direction)
+        {
+            if (!layout.HasFloor(coordinate))
+            {
+                return false;
+            }
+
+            var neighbor = coordinate + MazeDirectionUtility.GetOffset(direction);
+            if (!layout.Contains(neighbor))
+            {
+                return layout.HasWall(coordinate, direction);
+            }
+
+            return !layout.HasFloor(neighbor);
         }
 
         private Vector3 GetCellCenter(MazeCoordinate coordinate)

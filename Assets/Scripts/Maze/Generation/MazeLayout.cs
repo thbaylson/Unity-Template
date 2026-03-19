@@ -43,18 +43,32 @@ namespace Template.Maze.Generation
                    coordinate.Y < Height;
         }
 
+        public bool HasFloor(MazeCoordinate coordinate)
+        {
+            return GetCell(coordinate.X, coordinate.Y).HasFloor;
+        }
+
         public void SetCell(MazeCoordinate coordinate, MazeCell cell)
         {
             _cells[coordinate.X, coordinate.Y] = cell;
         }
 
+        public void SetFloor(MazeCoordinate coordinate, bool hasFloor)
+        {
+            var cell = GetCell(coordinate.X, coordinate.Y);
+            cell.SetFloor(hasFloor);
+            SetCell(coordinate, cell);
+        }
+
         public void CarvePassage(MazeCoordinate from, MazeCoordinate to, MazeWallDirection direction)
         {
             var fromCell = GetCell(from.X, from.Y);
+            fromCell.SetFloor(true);
             fromCell.ClearWall(direction);
             SetCell(from, fromCell);
 
             var toCell = GetCell(to.X, to.Y);
+            toCell.SetFloor(true);
             toCell.ClearWall(MazeDirectionUtility.GetOpposite(direction));
             SetCell(to, toCell);
         }
@@ -67,6 +81,7 @@ namespace Template.Maze.Generation
         public void SetExit(MazeCoordinate coordinate, MazeWallDirection direction)
         {
             var cell = GetCell(coordinate.X, coordinate.Y);
+            cell.SetFloor(true);
             cell.ClearWall(direction);
             SetCell(coordinate, cell);
 
@@ -76,12 +91,15 @@ namespace Template.Maze.Generation
 
         public IEnumerable<MazeCoordinate> GetReachableNeighbors(MazeCoordinate coordinate)
         {
+            if (!HasFloor(coordinate)) yield break;
+
             foreach (var direction in MazeDirectionUtility.AllDirections)
             {
                 if (HasWall(coordinate, direction)) continue;
 
                 var next = coordinate + MazeDirectionUtility.GetOffset(direction);
                 if (!Contains(next)) continue;
+                if (!HasFloor(next)) continue;
 
                 yield return next;
             }

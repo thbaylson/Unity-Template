@@ -5,6 +5,7 @@ namespace Template.Maze
         bool IsDirty { get; }
 
         MazeSessionState PrepareMazeForEntry(MazeConfig config);
+        MazeSessionState PrepareNewMaze(MazeConfig config);
         bool IsCoinCollected(string coinId);
         void MarkCoinCollected(string coinId);
         bool TryMarkMazeCompleted();

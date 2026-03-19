@@ -67,17 +67,35 @@ namespace Template
             setPosition = true;
         }
 
+        public void TeleportPlayer(Vector3 newPosition)
+        {
+            playerPosition = newPosition;
+            setPosition = true;
+
+            if (playerContainer == null || playerController == null)
+            {
+                return;
+            }
+
+            ApplyQueuedPlayerPosition();
+        }
+
         private void OnLevelLoaded(Scene scene, LoadSceneMode mode)
         {
             if (playerContainer != null && setPosition)
             {
-                // Setting the position when a CharacterController is involved requires disabling the CC.
-                playerController.enabled = false;
-                playerController.transform.position = playerPosition;
-                playerController.enabled = true;
-
-                setPosition = false;
+                ApplyQueuedPlayerPosition();
             }
+        }
+
+        private void ApplyQueuedPlayerPosition()
+        {
+            // Setting the position when a CharacterController is involved requires disabling the CC.
+            playerController.enabled = false;
+            playerController.transform.position = playerPosition;
+            playerController.enabled = true;
+
+            setPosition = false;
         }
     }
 }

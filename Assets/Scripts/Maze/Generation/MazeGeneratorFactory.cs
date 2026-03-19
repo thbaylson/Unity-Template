@@ -6,6 +6,10 @@ namespace Template.Maze.Generation
         {
             switch (algorithmKind)
             {
+                case MazeAlgorithmKind.RoomAndCorridorDungeon:
+                    return new RoomAndCorridorDungeonGenerator();
+                case MazeAlgorithmKind.CellularAutomata:
+                    return new CellularAutomataMazeGenerator();
                 case MazeAlgorithmKind.RecursiveBacktracker:
                 default:
                     return new RecursiveBacktrackerMazeGenerator();

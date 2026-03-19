@@ -82,6 +82,17 @@ namespace Template.Maze
             return CreateSessionState();
         }
 
+        public MazeSessionState PrepareNewMaze(MazeConfig config)
+        {
+            if (config == null)
+            {
+                return CreateSessionState();
+            }
+
+            BeginNewMaze(config, _saveData.hasActiveMaze ? _saveData.activeSeed : (int?)null);
+            return CreateSessionState();
+        }
+
         public bool IsCoinCollected(string coinId)
         {
             if (string.IsNullOrWhiteSpace(coinId) || _saveData.collectedCoinIds == null)
