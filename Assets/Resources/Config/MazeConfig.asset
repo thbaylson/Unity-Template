@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92d2b5f01e68b93478e13bca3094d4ab, type: 3}
+  m_Name: MazeConfig
+  m_EditorClassIdentifier: 
+  algorithmKind: 2
+  width: 25
+  height: 25
+  cellSize: 6
+  floorThickness: 0.25
+  wallThickness: 0.45
+  wallHeight: 4
+  mazeOrigin: {x: 0, y: 0, z: 0}
+  useSeedOverride: 0
+  seedOverride: 12345
+  minimumCoinCount: 4
+  maximumCoinCount: 9
+  coinHeight: 1
+  collectablePrefab: {fileID: 2417654134090450016, guid: af8109c9e07be1442849278ce0536990, type: 3}
+  doorwayPrefab: {fileID: 5937213894660758346, guid: 7c01453d93edf1d4798671ae043db0e8, type: 3}
+  playerSpawnOffset: {x: 0, y: 0, z: 0}
+  flatSceneReturnPosition: {x: 9.8, y: 0, z: -7.6}
+  doorwayCenterHeight: 1.321
+  exitDoorwayPositionOffset: {x: 0, y: 0, z: 0}
+  exitDoorwayScale: {x: 0.7, y: 0.66, z: 0.28}
+  floorMaterial: {fileID: 2100000, guid: ff188f58422043f489060e28a5e4e0c0, type: 2}
+  wallMaterial: {fileID: 2100000, guid: dbf898c9f9c4a2d46aa6336e23caeb61, type: 2}

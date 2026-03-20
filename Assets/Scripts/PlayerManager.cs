@@ -1,77 +1,100 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting.APIUpdating;
 
-public class PlayerManager : MonoBehaviour
+namespace Template
 {
-    public static PlayerManager Instance { get; private set; }
-
-    [SerializeField] private GameObject playerPrefab;
-    private GameObject playerContainer;
-    
-    private CharacterController playerController;
-    private Vector3 playerPosition;
-    private bool setPosition;
-
-    private void Awake()
+    [MovedFrom(true, null, "Assembly-CSharp", "PlayerManager")]
+    public class PlayerManager : MonoBehaviour
     {
-        if (Instance != null && Instance != this)
+        public static PlayerManager Instance { get; private set; }
+
+        [SerializeField] private GameObject playerPrefab;
+        private GameObject playerContainer;
+
+        private CharacterController playerController;
+        private Vector3 playerPosition;
+        private bool setPosition;
+
+        private void Awake()
         {
-            Destroy(gameObject);
-            return;
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
 
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
-
-    private void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnLevelLoaded;
-    }
-
-    void Start()
-    {
-        // If the player instance exists, do not create another
-        if (playerContainer != null) return;
-        
-        if (playerPrefab != null)
+        private void OnEnable()
         {
-            playerContainer = Instantiate(playerPrefab);
-            playerContainer.name = playerPrefab.name;
-            playerController = playerContainer.GetComponentInChildren<CharacterController>();
-
-            DontDestroyOnLoad(playerContainer);
+            SceneManager.sceneLoaded += OnLevelLoaded;
         }
-    }
 
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnLevelLoaded;
-    }
-
-    void OnDestroy()
-    {
-        if (playerContainer != null)
+        void Start()
         {
-            Destroy(playerContainer);
+            // If the player instance exists, do not create another
+            if (playerContainer != null) return;
+
+            if (playerPrefab != null)
+            {
+                playerContainer = Instantiate(playerPrefab);
+                playerContainer.name = playerPrefab.name;
+                playerController = playerContainer.GetComponentInChildren<CharacterController>();
+
+                DontDestroyOnLoad(playerContainer);
+            }
         }
-    }
 
-    public void SetPlayerPosition(Vector3 newPosition)
-    {
-        playerPosition = newPosition;
-        setPosition = true;
-    }
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnLevelLoaded;
+        }
 
-    private void OnLevelLoaded(Scene scene, LoadSceneMode mode)
-    {
-        if (playerContainer != null && setPosition)
+        void OnDestroy()
+        {
+            if (playerContainer != null)
+            {
+                Destroy(playerContainer);
+            }
+        }
+
+        public void SetPlayerPosition(Vector3 newPosition)
+        {
+            playerPosition = newPosition;
+            setPosition = true;
+        }
+
+        public void TeleportPlayer(Vector3 newPosition)
+        {
+            playerPosition = newPosition;
+            setPosition = true;
+
+            if (playerContainer == null || playerController == null)
+            {
+                return;
+            }
+
+            ApplyQueuedPlayerPosition();
+        }
+
+        private void OnLevelLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (playerContainer != null && setPosition)
+            {
+                ApplyQueuedPlayerPosition();
+            }
+        }
+
+        private void ApplyQueuedPlayerPosition()
         {
             // Setting the position when a CharacterController is involved requires disabling the CC.
             playerController.enabled = false;
             playerController.transform.position = playerPosition;
             playerController.enabled = true;
-            
+
             setPosition = false;
         }
     }

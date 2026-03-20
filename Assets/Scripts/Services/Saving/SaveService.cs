@@ -1,38 +1,51 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting.APIUpdating;
 
-public interface ISaveService
+namespace Template.Services.Saving
 {
-    GameDataCache GameDataCache { get; }
+    public interface ISaveService
+    {
+        GameDataCache GameDataCache { get; }
+        bool IsGameDirty { get; }
 
-    bool IsGameDirty { get; }
+        event Action GameLoaded;
+        event Action GameSaved;
+        event Action GameDeleted;
 
-    void MarkGameDirty();
+        void MarkGameDirty();
 
-    void Register(ILevelFlaggable levelFlaggable);
-    void SetGameDataCacheFlag(string name, string id, bool value);
+        void Register(ILevelFlaggable levelFlaggable);
+        void SetGameDataCacheFlag(string name, string id, bool value);
 
-    void LoadGame();
-    bool LoadGameExists();
-    void SaveGame();
-    void DeleteGame();
-}
+        void LoadGame();
+        bool LoadGameExists();
+        void SaveGame();
+        void DeleteGame();
+    }
 
-public class SaveService : MonoBehaviour, ISaveService
-{
-    private ISaveStorage _storage;
-    private ISaveSerializer _serializer;
+    [MovedFrom(true, null, "Assembly-CSharp", "SaveService")]
+    public class SaveService : MonoBehaviour, ISaveService
+    {
+        private ISaveStorage _storage;
+        private ISaveSerializer _serializer;
 
     [SerializeField] private string gameFileName = "game.json";
     [SerializeField] private int gameSchemaVersion = 1;
 
     public GameDataCache GameDataCache { get; private set; } = new GameDataCache();
     public bool IsGameDirty { get; private set; }
+    
+    public event Action GameLoaded;
+    public event Action GameSaved;
+    public event Action GameDeleted;
 
     // Self-registered flaggables, grouped by scene name.
     private readonly Dictionary<string, HashSet<ILevelFlaggable>> _levelFlaggablesByScene
         = new Dictionary<string, HashSet<ILevelFlaggable>>();
+
 
     private void Awake()
     {
@@ -40,7 +53,11 @@ public class SaveService : MonoBehaviour, ISaveService
 
         Services.SaveService = this;
 
-        _storage = new FileSaveStorage();
+#if UNITY_WEBGL && !UNITY_EDITOR
+        _storage = new WebFileSaveStorage();
+#else
+        _storage = new WindowsFileSaveStorage();
+#endif
         _serializer = new JsonSaveSerializer();
     }
 
@@ -55,6 +72,7 @@ public class SaveService : MonoBehaviour, ISaveService
     }
 
     public void MarkGameDirty() => IsGameDirty = true;
+
     public bool LoadGameExists() => _storage.Exists(gameFileName);
 
     public void LoadGame()
@@ -63,6 +81,7 @@ public class SaveService : MonoBehaviour, ISaveService
         {
             GameDataCache = new GameDataCache();
             IsGameDirty = false;
+            GameLoaded?.Invoke();
             return;
         }
 
@@ -107,11 +126,17 @@ public class SaveService : MonoBehaviour, ISaveService
 
             // Apply for currently active scene(s)
             ApplyFlagsForScene(SceneManager.GetActiveScene().name);
+            Debug.Log("Game loaded successfully.");
         }
         catch
         {
             GameDataCache = new GameDataCache();
             IsGameDirty = true;
+            Debug.Log("Game load failed.");
+        }
+        finally
+        {
+            GameLoaded?.Invoke();
         }
     }
 
@@ -120,7 +145,11 @@ public class SaveService : MonoBehaviour, ISaveService
         // Capture current scene flags before writing
         CaptureFlagsForScene(SceneManager.GetActiveScene().name);
 
-        if (!IsGameDirty) return;
+        if (!IsGameDirty)
+        {
+            GameSaved?.Invoke();
+            return;
+        }
 
         var dto = new GameFileDto
         {
@@ -149,6 +178,7 @@ public class SaveService : MonoBehaviour, ISaveService
         _storage.WriteAllBytes(gameFileName, bytes);
 
         IsGameDirty = false;
+        GameSaved?.Invoke();
     }
 
     public void DeleteGame()
@@ -158,6 +188,7 @@ public class SaveService : MonoBehaviour, ISaveService
         GameDataCache = new GameDataCache();
 
         IsGameDirty = false;
+        GameDeleted?.Invoke();
     }
 
     /// <summary>Flaggables call this on enable.</summary>
@@ -246,10 +277,11 @@ public class SaveService : MonoBehaviour, ISaveService
         return map.TryGetValue(id, out value);
     }
 
-    private static string GetFlaggableSceneName(ILevelFlaggable flaggable)
-    {
-        if (flaggable is MonoBehaviour mb) return mb.gameObject.scene.name;
+        private static string GetFlaggableSceneName(ILevelFlaggable flaggable)
+        {
+            if (flaggable is MonoBehaviour mb) return mb.gameObject.scene.name;
 
-        return SceneManager.GetActiveScene().name;
+            return SceneManager.GetActiveScene().name;
+        }
     }
 }

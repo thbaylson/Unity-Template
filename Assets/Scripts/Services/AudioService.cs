@@ -3,45 +3,49 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting.APIUpdating;
 
-public interface IAudioService
+namespace Template.Services
 {
-    float MasterVolumeNormalized { get; }
-    float MusicVolumeNormalized { get; }
-    float SfxVolumeNormalized { get; }
+    public interface IAudioService
+    {
+        float MasterVolumeNormalized { get; }
+        float MusicVolumeNormalized { get; }
+        float SfxVolumeNormalized { get; }
 
-    event Action<float> MasterVolumeChanged;
-    event Action<float> MusicVolumeChanged;
-    event Action<float> SfxVolumeChanged;
+        event Action<float> MasterVolumeChanged;
+        event Action<float> MusicVolumeChanged;
+        event Action<float> SfxVolumeChanged;
 
-    void SetMasterVolume(float normalized01);
-    void SetMusicVolume(float normalized01);
-    void SetSfxVolume(float normalized01);
+        void SetMasterVolume(float normalized01);
+        void SetMusicVolume(float normalized01);
+        void SetSfxVolume(float normalized01);
 
-    AudioClip CurrentMusicClip { get; }
+        AudioClip CurrentMusicClip { get; }
 
-    void PlayMusic(AudioClip clip, float crossfadeSeconds = -1f, bool loop = true);
-    void StopMusic(float fadeOutSeconds = -1f);
+        void PlayMusic(AudioClip clip, float crossfadeSeconds = -1f, bool loop = true);
+        void StopMusic(float fadeOutSeconds = -1f);
 
-    void PlaySfx(AudioClip clip, float volumeScale = 1f, float pitch = 1f);
-    void PlaySfxAtPoint(AudioClip clip, Vector3 position, float volumeScale = 1f, float pitch = 1f, float minDistance = 1f, float maxDistance = 20f
-);
+        void PlaySfx(AudioClip clip, float volumeScale = 1f, float pitch = 1f);
+        void PlaySfxAtPoint(AudioClip clip, Vector3 position, float volumeScale = 1f, float pitch = 1f, float minDistance = 1f, float maxDistance = 20f
+    );
 
-}
+    }
 
-/// <summary>
-/// This service manages music and sound effects, including scene-based music management, crossfading, and volume control via an AudioMixer.
-/// On scene load, it looks for a MusicConfig component to determine what to do with the music: override to a new song, 
-/// keep the same song playing, or stop the music for the current scene.
-/// </summary>
-public class AudioService : MonoBehaviour, IAudioService
-{
-    private const string MasterVolKey = "audio.masterVolume";
-    private const string MusicVolKey = "audio.musicVolume";
-    private const string SfxVolKey = "audio.sfxVolume";
+    /// <summary>
+    /// This service manages music and sound effects, including scene-based music management, crossfading, and volume control via an AudioMixer.
+    /// On scene load, it looks for a MusicConfig component to determine what to do with the music: override to a new song, 
+    /// keep the same song playing, or stop the music for the current scene.
+    /// </summary>
+    [MovedFrom(true, null, "Assembly-CSharp", "AudioService")]
+    public class AudioService : MonoBehaviour, IAudioService
+    {
+        private const string MasterVolKey = "audio.masterVolume";
+        private const string MusicVolKey = "audio.musicVolume";
+        private const string SfxVolKey = "audio.sfxVolume";
 
-    private const float MinDb = -80f;
-    private const float MaxDb = 0f;
+        private const float MinDb = -80f;
+        private const float MaxDb = 0f;
 
     [Header("Mixer")]
     [SerializeField] private AudioMixer audioMixer;
@@ -86,20 +90,20 @@ public class AudioService : MonoBehaviour, IAudioService
 
     private Coroutine _musicFadeRoutine;
 
-    private void Awake()
-    {
-        if (Services.AudioService != null)
+        private void Awake()
         {
-            Destroy(gameObject);
-            return;
+            if (Services.AudioService != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Services.AudioService = this;
+
+            CreateMusicSources();
+            CreateSfxPool();
+            CreateSfx3dPool();
         }
-
-        Services.AudioService = this;
-
-        CreateMusicSources();
-        CreateSfxPool();
-        CreateSfx3dPool();
-    }
 
     private void OnEnable()
     {
@@ -397,14 +401,15 @@ public class AudioService : MonoBehaviour, IAudioService
         audioMixer.SetFloat(sfxVolumeParameter, NormalizedToDb(SfxVolumeNormalized));
     }
 
-    private static float NormalizedToDb(float normalized01)
-    {
-        float t = Mathf.Clamp01(normalized01);
+        private static float NormalizedToDb(float normalized01)
+        {
+            float t = Mathf.Clamp01(normalized01);
 
-        // Log-ish curve: 0..1 mapped to 0..1 in a more perceptual way
-        // curve = log10(1 + 9t) -> 0..1
-        float curve = Mathf.Log10(1f + 9f * t);
+            // Log-ish curve: 0..1 mapped to 0..1 in a more perceptual way
+            // curve = log10(1 + 9t) -> 0..1
+            float curve = Mathf.Log10(1f + 9f * t);
 
-        return Mathf.Lerp(MinDb, MaxDb, curve);
+            return Mathf.Lerp(MinDb, MaxDb, curve);
+        }
     }
 }

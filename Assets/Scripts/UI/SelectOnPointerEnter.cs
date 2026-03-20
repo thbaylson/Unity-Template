@@ -1,12 +1,16 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Scripting.APIUpdating;
 
-
-public class SelectOnPointerEnter : MonoBehaviour, IPointerEnterHandler
+namespace Template.UI
 {
-    public void OnPointerEnter(PointerEventData eventData)
+    [MovedFrom(true, null, "Assembly-CSharp", "SelectOnPointerEnter")]
+    public class SelectOnPointerEnter : MonoBehaviour, IPointerEnterHandler
     {
-        if (EventSystem.current == null) return;
-        EventSystem.current.SetSelectedGameObject(gameObject);
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (EventSystem.current == null) return;
+            EventSystem.current.SetSelectedGameObject(gameObject);
+        }
     }
 }

@@ -1,87 +1,97 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.Scripting.APIUpdating;
+using ServiceLocator = Template.Services.Services;
 
-public class TitleScreenManager : MonoBehaviour
+namespace Template.UI
 {
-    [SerializeField] private string firstGameplayScene = "FlatScene";
-
-    [Header("Container")]
-    [SerializeField] private GameObject buttonContainer;
-
-    [Header("Buttons")]
-    [SerializeField] private Button newGameButton;
-    [SerializeField] private Button loadGameButton;
-    [SerializeField] private Button settingsButton;
-    [SerializeField] private Button quitGameButton;
-
-    private void Awake()
+    [MovedFrom(true, null, "Assembly-CSharp", "TitleScreenManager")]
+    public class TitleScreenManager : MonoBehaviour
     {
-        // Bind buttons.
-        if (newGameButton) newGameButton.onClick.AddListener(OnNewGame);
-        if (loadGameButton) loadGameButton.onClick.AddListener(OnLoadGame);
-        if (settingsButton) settingsButton.onClick.AddListener(OnSettings);
-        if (quitGameButton) quitGameButton.onClick.AddListener(OnQuit);
-    }
+        [SerializeField] private string firstGameplayScene = "FlatScene";
 
-    private void OnEnable()
-    {
-        HandleFocusReturned();
-    }
+        [Header("Container")]
+        [SerializeField] private GameObject buttonContainer;
 
-    private void RefreshButtonVisibility()
-    {
-        bool hasSave = Services.SaveService.LoadGameExists();
-        loadGameButton.gameObject.SetActive(hasSave);
-    }
+        [Header("Buttons")]
+        [SerializeField] private Button newGameButton;
+        [SerializeField] private Button loadGameButton;
+        [SerializeField] private Button settingsButton;
+        [SerializeField] private Button quitGameButton;
 
-    private void EnsureValidSelection()
-    {
-        // If Load is hidden, make sure UI selection isn't pointing at it.
-        if (EventSystem.current == null) return;
-
-        if (newGameButton != null)
+        private void Awake()
         {
-            EventSystem.current.SetSelectedGameObject(newGameButton.gameObject);
-        }
-    }
+            // Bind buttons.
+            if (newGameButton) newGameButton.onClick.AddListener(OnNewGame);
+            if (loadGameButton) loadGameButton.onClick.AddListener(OnLoadGame);
+            if (settingsButton) settingsButton.onClick.AddListener(OnSettings);
+            if (quitGameButton) quitGameButton.onClick.AddListener(OnQuit);
 
-    private void OnNewGame()
-    {
-        // TODO: Add confirmation popup if a save already exists.
-        Services.SaveService.DeleteGame();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(firstGameplayScene);
-    }
-
-    private void OnLoadGame()
-    {
-        Services.SaveService.LoadGame();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(firstGameplayScene);
-    }
-
-    private void OnSettings()
-    {
-        UIService.Instance.ShowSettings(onBack: HandleFocusReturned);
-        buttonContainer.SetActive(false);
-    }
-
-    private void HandleFocusReturned()
-    {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
-        buttonContainer.SetActive(true);
-
-        RefreshButtonVisibility();
-        EnsureValidSelection();
-    }
-
-    private void OnQuit()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
+#if UNITY_WEBGL
+            if (quitGameButton) quitGameButton.gameObject.SetActive(false);
 #endif
+        }
+
+        private void OnEnable()
+        {
+            HandleFocusReturned();
+        }
+
+        private void RefreshButtonVisibility()
+        {
+            bool hasSave = ServiceLocator.SaveService.LoadGameExists();
+            loadGameButton.gameObject.SetActive(hasSave);
+        }
+
+        private void EnsureValidSelection()
+        {
+            // If Load is hidden, make sure UI selection isn't pointing at it.
+            if (EventSystem.current == null) return;
+
+            if (newGameButton != null)
+            {
+                EventSystem.current.SetSelectedGameObject(newGameButton.gameObject);
+            }
+        }
+
+        private void OnNewGame()
+        {
+            // TODO: Add confirmation popup if a save already exists.
+            ServiceLocator.SaveService.DeleteGame();
+            UnityEngine.SceneManagement.SceneManager.LoadScene(firstGameplayScene);
+        }
+
+        private void OnLoadGame()
+        {
+            ServiceLocator.SaveService.LoadGame();
+            UnityEngine.SceneManagement.SceneManager.LoadScene(firstGameplayScene);
+        }
+
+        private void OnSettings()
+        {
+            UIService.Instance.ShowSettings(onBack: HandleFocusReturned);
+            buttonContainer.SetActive(false);
+        }
+
+        private void HandleFocusReturned()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            buttonContainer.SetActive(true);
+
+            RefreshButtonVisibility();
+            EnsureValidSelection();
+        }
+
+        private void OnQuit()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
     }
 }

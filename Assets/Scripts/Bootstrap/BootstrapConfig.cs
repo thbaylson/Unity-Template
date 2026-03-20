@@ -1,40 +1,47 @@
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-[CreateAssetMenu(menuName = "Config/BootstrapConfig", fileName = "BootstrapConfig")]
-public class BootstrapConfig : ScriptableObject
+namespace Template.Bootstrap
 {
-    [Header("Scene Names")]
-    public string bootstrapSceneName = "Bootstrap";
-
-    [Header("Persistent Manager Prefabs")]
-    [Tooltip("These managers will exist in every scene and persist across scene loads.")]
-    public ManagerPrefabEntry[] persistentManagers;
-
-    [Header("Per-Scene Manager Profiles")]
-    [Tooltip("These profiles define which managers should be instantiated for specific scenes.")]
-    public SceneProfile[] sceneProfiles;
-
-    public SceneProfile GetProfileForScene(string sceneName)
+    [MovedFrom(true, null, "Assembly-CSharp", "BootstrapConfig")]
+    [CreateAssetMenu(menuName = "Config/BootstrapConfig", fileName = "BootstrapConfig")]
+    public class BootstrapConfig : ScriptableObject
     {
-        foreach (var profile in sceneProfiles)
+        [Header("Bootstrap Scene Name")]
+        public string bootstrapSceneName = "Bootstrap";
+
+        [Header("Persistent Service Prefabs")]
+        [Tooltip("These services will exist in every scene and persist across scene loads.")]
+        public ServicePrefabEntry[] persistentServices;
+
+        [Header("Per-Scene Manager Profiles")]
+        [Tooltip("These profiles define which managers should be instantiated for specific scenes.")]
+        public SceneProfile[] sceneProfiles;
+
+        public SceneProfile GetProfileForScene(string sceneName)
         {
-            if (profile != null && profile.sceneName == sceneName)
-                return profile;
+            foreach (var profile in sceneProfiles)
+            {
+                if (profile != null && profile.sceneName == sceneName)
+                    return profile;
+            }
+            return null;
         }
-        return null;
     }
-}
 
-[Serializable]
-public class ManagerPrefabEntry
-{
-    public GameObject prefab;
-}
+    [MovedFrom(true, null, "Assembly-CSharp", "ServicePrefabEntry")]
+    [Serializable]
+    public class ServicePrefabEntry
+    {
+        public GameObject prefab;
+    }
 
-[Serializable]
-public class SceneProfile
-{
-    public string sceneName;
-    public GameObject[] perSceneManagers;
+    [MovedFrom(true, null, "Assembly-CSharp", "SceneProfile")]
+    [Serializable]
+    public class SceneProfile
+    {
+        public string sceneName;
+        public GameObject[] perSceneManagers;
+    }
 }

@@ -1,122 +1,128 @@
 using System;
+using Template.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.Scripting.APIUpdating;
 
-public interface IPauseService
+namespace Template.Services
 {
-    bool IsPaused { get; }
-    event Action<bool> PausedChanged;
-
-    void RegisterPlayerInput(PlayerInput playerInput);
-    void RegisterMenu(PauseMenuUI menu);
-
-    void Toggle();
-    void SetPaused(bool paused);
-    public void SetUIFocus(bool isFocused);
-}
-
-public class PauseService : MonoBehaviour, IPauseService
-{
-    public bool IsPaused { get; private set; } = false;
-    public event Action<bool> PausedChanged;
-
-    [SerializeField] private string gameplayMap = "Player";
-    [SerializeField] private string uiMap = "UI";
-
-    private PlayerInput playerInput;
-    private PauseMenuUI menuUI;
-
-    /// The reason we assign this input action here instead of setting it up in StarterAssetsInputs is because 
-    /// EventSystem was consuming the Close input before it ever got to StarterAssetsInputs. Thus, we subscribe 
-    /// directly to the UI Input System's cancel action.
-    private InputAction _cancelAction;
-
-    private void Awake()
+    public interface IPauseService
     {
-        if (Services.PauseService != null) return;
+        bool IsPaused { get; }
+        event Action<bool> PausedChanged;
 
-        Services.PauseService = this;
+        void RegisterPlayerInput(PlayerInput playerInput);
+        void RegisterMenu(PauseMenuUI menu);
+
+        void Toggle();
+        void SetPaused(bool paused);
+        public void SetUIFocus(bool isFocused);
     }
 
-    private void OnEnable()
+    [MovedFrom(true, null, "Assembly-CSharp", "PauseService")]
+    public class PauseService : MonoBehaviour, IPauseService
     {
-        SetUIFocus(true);
-    }
+        public bool IsPaused { get; private set; } = false;
+        public event Action<bool> PausedChanged;
 
-    public void RegisterPlayerInput(PlayerInput playerInput)
-    {
-        this.playerInput = playerInput;
-        ApplyInputMap();
-    }
+        [SerializeField] private string gameplayMap = "Player";
+        [SerializeField] private string uiMap = "UI";
 
-    public void RegisterMenu(PauseMenuUI menu)
-    {
-        menuUI = menu;
-        menuUI.SetVisible(IsPaused);
-    }
+        private PlayerInput playerInput;
+        private PauseMenuUI menuUI;
 
-    public void Toggle() => SetPaused(!IsPaused);
+        /// The reason we assign this input action here instead of setting it up in StarterAssetsInputs is because 
+        /// EventSystem was consuming the Close input before it ever got to StarterAssetsInputs. Thus, we subscribe 
+        /// directly to the UI Input System's cancel action.
+        private InputAction _cancelAction;
 
-    public void SetPaused(bool paused)
-    {
-        if (IsPaused == paused) return;
-
-        IsPaused = paused;
-
-        Time.timeScale = paused ? 0f : 1f;
-        Cursor.visible = paused;
-        Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
-
-        ApplyInputMap();
-        menuUI?.SetVisible(paused);
-
-        PausedChanged?.Invoke(paused);
-    }
-
-    // This is an attempt to fix the issue of cancelling the pause menu while inside the settings menu, thus letting 
-    // the player move around while the settings menu is still open.
-    public void SetUIFocus(bool isFocused)
-    {
-        if (isFocused)
+        private void Awake()
         {
-            var uiModule = EventSystem.current?.GetComponent<InputSystemUIInputModule>();
-            if (uiModule != null && uiModule.cancel != null)
+            if (Services.PauseService != null) return;
+
+            Services.PauseService = this;
+        }
+
+        private void OnEnable()
+        {
+            SetUIFocus(true);
+        }
+
+        public void RegisterPlayerInput(PlayerInput playerInput)
+        {
+            this.playerInput = playerInput;
+            ApplyInputMap();
+        }
+
+        public void RegisterMenu(PauseMenuUI menu)
+        {
+            menuUI = menu;
+            menuUI.SetVisible(IsPaused);
+        }
+
+        public void Toggle() => SetPaused(!IsPaused);
+
+        public void SetPaused(bool paused)
+        {
+            if (IsPaused == paused) return;
+
+            IsPaused = paused;
+
+            Time.timeScale = paused ? 0f : 1f;
+            Cursor.visible = paused;
+            Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
+
+            ApplyInputMap();
+            menuUI?.SetVisible(paused);
+
+            PausedChanged?.Invoke(paused);
+        }
+
+        // This is an attempt to fix the issue of cancelling the pause menu while inside the settings menu, thus letting 
+        // the player move around while the settings menu is still open.
+        public void SetUIFocus(bool isFocused)
+        {
+            if (isFocused)
             {
-                _cancelAction = uiModule.cancel.action;
-                _cancelAction.performed += OnCancelPerformed;
+                var uiModule = EventSystem.current?.GetComponent<InputSystemUIInputModule>();
+                if (uiModule != null && uiModule.cancel != null)
+                {
+                    _cancelAction = uiModule.cancel.action;
+                    _cancelAction.performed += OnCancelPerformed;
+                }
+            }
+            else
+            {
+                if (_cancelAction != null)
+                {
+                    _cancelAction.performed -= OnCancelPerformed;
+                    _cancelAction = null;
+                }
             }
         }
-        else
+
+        private void OnCancelPerformed(InputAction.CallbackContext ctx)
+        {
+            SetPaused(false);
+        }
+
+        private void ApplyInputMap()
+        {
+            if (playerInput == null) return;
+            playerInput.SwitchCurrentActionMap(IsPaused ? uiMap : gameplayMap);
+        }
+
+        private void OnDisable()
         {
             if (_cancelAction != null)
             {
                 _cancelAction.performed -= OnCancelPerformed;
                 _cancelAction = null;
             }
+
+            if (IsPaused) SetPaused(false);
         }
-    }
-
-    private void OnCancelPerformed(InputAction.CallbackContext ctx)
-    {
-        SetPaused(false);
-    }
-
-    private void ApplyInputMap()
-    {
-        if (playerInput == null) return;
-        playerInput.SwitchCurrentActionMap(IsPaused ? uiMap : gameplayMap);
-    }
-
-    private void OnDisable()
-    {
-        if (_cancelAction != null)
-        {
-            _cancelAction.performed -= OnCancelPerformed;
-            _cancelAction = null;
-        }
-
-        if (IsPaused) SetPaused(false);
     }
 }

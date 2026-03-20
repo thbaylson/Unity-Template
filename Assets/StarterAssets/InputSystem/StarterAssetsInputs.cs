@@ -1,3 +1,4 @@
+using ServiceLocator = Template.Services.Services;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -23,17 +24,17 @@ namespace StarterAssets
 
         private void OnEnable()
         {
-            if(Services.PauseService != null)
+            if(ServiceLocator.PauseService != null)
 			{
-                Services.PauseService.PausedChanged += OnPausedChanged;
+                ServiceLocator.PauseService.PausedChanged += OnPausedChanged;
             }
         }
 
         private void OnDisable()
         {
-            if (Services.PauseService != null)
+            if (ServiceLocator.PauseService != null)
 			{
-                Services.PauseService.PausedChanged -= OnPausedChanged;
+                ServiceLocator.PauseService.PausedChanged -= OnPausedChanged;
             }
         }
 
@@ -64,7 +65,7 @@ namespace StarterAssets
 
         public void OnJump(InputValue value)
         {
-            if (Services.PauseService?.IsPaused ?? false) return;
+            if (ServiceLocator.PauseService?.IsPaused ?? false) return;
             JumpInput(value.isPressed);
         }
 
@@ -108,7 +109,7 @@ namespace StarterAssets
 
 		public void PauseInput()
 		{
-            Services.PauseService?.Toggle();
+            ServiceLocator.PauseService?.Toggle();
         }
 
 		//public void Action(bool newTriggerState)

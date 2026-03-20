@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using ServiceLocator = Template.Services.Services;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -135,7 +136,7 @@ namespace StarterAssets
 
         private void Awake()
         {
-            Services.PauseService?.RegisterPlayerInput(_playerInput);
+            ServiceLocator.PauseService?.RegisterPlayerInput(_playerInput);
 
             // get a reference to our main camera
             if (_mainCamera == null)
@@ -398,7 +399,7 @@ namespace StarterAssets
                     var index = UnityEngine.Random.Range(0, FootstepAudioClips.Length);
                     var pos = transform.TransformPoint(_controller.center);
                     float pitch = UnityEngine.Random.Range(0.95f, 1.05f);
-                    Services.AudioService?.PlaySfxAtPoint(FootstepAudioClips[index], pos, FootstepAudioVolume, pitch);
+                    ServiceLocator.AudioService?.PlaySfxAtPoint(FootstepAudioClips[index], pos, FootstepAudioVolume, pitch);
                 }
             }
         }
@@ -408,7 +409,7 @@ namespace StarterAssets
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
                 var pos = transform.TransformPoint(_controller.center);
-                Services.AudioService?.PlaySfxAtPoint(LandingAudioClip, pos, FootstepAudioVolume);
+                ServiceLocator.AudioService?.PlaySfxAtPoint(LandingAudioClip, pos, FootstepAudioVolume);
             }
         }
     }

@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 
-public class GameDataCache
+namespace Template.Services.Saving
 {
-    public PlayerSaveData Player = new PlayerSaveData();
+    public class GameDataCache
+    {
+        public PlayerSaveData Player = new PlayerSaveData();
 
-    // sceneName -> (interactableId -> flag)
-    public readonly Dictionary<string, Dictionary<string, bool>> LevelInteractableFlags = new Dictionary<string, Dictionary<string, bool>>();
+        // sceneName -> (interactableId -> flag)
+        public readonly Dictionary<string, Dictionary<string, bool>> LevelInteractableFlags = new Dictionary<string, Dictionary<string, bool>>();
+    }
 }

@@ -1,12 +1,17 @@
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-public class Rotator : MonoBehaviour
+namespace Template
 {
-    [SerializeField] private Vector3 rotationSpeed = new Vector3(0f, 0f, 0f);
-
-    // Update is called once per frame
-    void Update()
+    [MovedFrom(true, null, "Assembly-CSharp", "Rotator")]
+    public class Rotator : MonoBehaviour
     {
-        transform.Rotate(rotationSpeed * Time.deltaTime);
+        [SerializeField] private Vector3 rotationSpeed = new Vector3(0f, 0f, 0f);
+
+        // Update is called once per frame
+        void Update()
+        {
+            transform.Rotate(rotationSpeed * Time.deltaTime);
+        }
     }
 }

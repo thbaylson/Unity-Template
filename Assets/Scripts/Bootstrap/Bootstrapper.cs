@@ -1,46 +1,54 @@
 using System.Collections.Generic;
 using System.Linq;
+using ServiceLocator = Template.Services.Services;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting.APIUpdating;
 
-public class Bootstrapper : MonoBehaviour
+namespace Template.Bootstrap
 {
-    public static Bootstrapper Instance { get; private set; }
-
-    [SerializeField] private BootstrapConfig config;
-
-    // Track managers to prevent duplicate instantiations.
-    private readonly Dictionary<string, GameObject> _persistentInstances = new Dictionary<string, GameObject>();
-    private readonly Dictionary<string, GameObject> _sceneManagers = new Dictionary<string, GameObject>();
-
-    private void Awake()
+    [MovedFrom(true, null, "Assembly-CSharp", "Bootstrapper")]
+    public class Bootstrapper : MonoBehaviour
     {
-        if (Instance != null && Instance != this)
+        public static Bootstrapper Instance { get; private set; }
+
+        [SerializeField] private BootstrapConfig config;
+
+        // Track services/managers to prevent duplicate instantiations.
+        private readonly Dictionary<string, GameObject> _persistentServices = new Dictionary<string, GameObject>();
+        private readonly Dictionary<string, GameObject> _sceneManagers = new Dictionary<string, GameObject>();
+
+        private void Awake()
         {
-            Destroy(gameObject);
-            return;
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+
+            if (config == null)
+            {
+                Debug.LogError("Bootstrapper has no BootstrapConfig assigned.", this);
+                return;
+            }
+
+            InitializePersistentServices();
         }
 
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        if (config == null)
+        private void Start()
         {
-            Debug.LogError("Bootstrapper has no BootstrapConfig assigned.", this);
-            return;
+            // This supports developers starting Play Mode from any scene, but won't affect real players.
+#if UNITY_EDITOR
+            ServiceLocator.SaveService?.LoadGame();
+#endif
+
+            // The Bootstrap scene is loaded additively at runtime AFTER
+            // the scene that was run from the editor.
+            ProcessLoadedScenes();
         }
-
-        InitializePersistentManagers();
-    }
-
-    private void Start()
-    {
-        Services.SaveService?.LoadGame();
-
-        // The Bootstrap scene is loaded additively at runtime AFTER
-        // the scene that was run from the editor.
-        ProcessLoadedScenes();
-    }
 
     private void OnEnable()
     {
@@ -52,18 +60,18 @@ public class Bootstrapper : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void InitializePersistentManagers()
+    private void InitializePersistentServices()
     {
-        if (config.persistentManagers == null) return;
+        if (config.persistentServices == null) return;
 
-        foreach (var entry in config.persistentManagers)
+        foreach (var entry in config.persistentServices)
         {
             if (entry == null || entry.prefab == null || string.IsNullOrEmpty(entry.prefab.name)) continue;
-            if (_persistentInstances.ContainsKey(entry.prefab.name)) continue;
+            if (_persistentServices.ContainsKey(entry.prefab.name)) continue;
 
             var instance = Instantiate(entry.prefab, transform);
             instance.name = entry.prefab.name;
-            _persistentInstances.Add(entry.prefab.name, instance);
+            _persistentServices.Add(entry.prefab.name, instance);
         }
     }
 
@@ -121,19 +129,20 @@ public class Bootstrapper : MonoBehaviour
         }
     }
 
-    private void LoadSceneManagers(Scene scene)
-    {
-        var profile = config.GetProfileForScene(scene.name);
-        if (profile == null || profile.perSceneManagers == null) return;
-
-        foreach (var prefab in profile.perSceneManagers)
+        private void LoadSceneManagers(Scene scene)
         {
-            if (prefab == null) continue;
-            if (_sceneManagers.ContainsKey(prefab.name)) continue;
+            var profile = config.GetProfileForScene(scene.name);
+            if (profile == null || profile.perSceneManagers == null) return;
 
-            var instance = Instantiate(prefab);
-            instance.name = prefab.name;
-            _sceneManagers.Add(prefab.name, instance);
+            foreach (var prefab in profile.perSceneManagers)
+            {
+                if (prefab == null) continue;
+                if (_sceneManagers.ContainsKey(prefab.name)) continue;
+
+                var instance = Instantiate(prefab);
+                instance.name = prefab.name;
+                _sceneManagers.Add(prefab.name, instance);
+            }
         }
     }
 }

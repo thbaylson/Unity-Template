@@ -1,41 +1,56 @@
 using System;
+using ServiceLocator = Template.Services.Services;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting.APIUpdating;
 
-public class GoldCollector : MonoBehaviour
+namespace Template
 {
-    public static event Action<int> OnGoldChanged;
-    public static event Action<int> OnStateRefresh;
-
-    public int Gold { get; private set; }
-
-    private void Start()
+    [MovedFrom(true, null, "Assembly-CSharp", "GoldCollector")]
+    public class GoldCollector : MonoBehaviour
     {
-        Gold = Services.SaveService.GameDataCache.Player.GoldAmount;
-        OnStateRefresh?.Invoke(Gold);
-    }
+        public static event Action<int> OnGoldChanged;
+        public static event Action<int> OnStateRefresh;
 
-    private void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
+        public static event Action<int, int> OnGoldCollected;
 
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
+        public int Gold { get; private set; }
 
-    public void CollectGold(int amount)
-    {
-        Gold += amount;
+        private void Start()
+        {
+            Gold = ServiceLocator.SaveService.GameDataCache.Player.GoldAmount;
+            OnStateRefresh?.Invoke(Gold);
+        }
 
-        Services.SaveService.GameDataCache.Player.GoldAmount = Gold;
-        Services.SaveService.MarkGameDirty();
-        OnGoldChanged?.Invoke(Gold);
-    }
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        OnStateRefresh?.Invoke(Gold);
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        public void CollectGold(int amount)
+        {
+            if (amount <= 0) return;
+
+            Gold += amount;
+
+            var playerData = ServiceLocator.SaveService.GameDataCache.Player;
+            playerData.GoldAmount = Gold;
+            playerData.TotalGoldCollected += amount;
+
+            ServiceLocator.SaveService.MarkGameDirty();
+
+            OnGoldCollected?.Invoke(amount, Gold);
+            OnGoldChanged?.Invoke(Gold);
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            OnStateRefresh?.Invoke(Gold);
+        }
     }
 }
