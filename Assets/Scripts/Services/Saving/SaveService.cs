@@ -12,6 +12,7 @@ namespace Template.Services.Saving
         bool IsGameDirty { get; }
 
         event Action GameLoaded;
+        event Action GameSaved;
         event Action GameDeleted;
 
         void MarkGameDirty();
@@ -38,6 +39,7 @@ namespace Template.Services.Saving
     public bool IsGameDirty { get; private set; }
     
     public event Action GameLoaded;
+    public event Action GameSaved;
     public event Action GameDeleted;
 
     // Self-registered flaggables, grouped by scene name.
@@ -79,6 +81,7 @@ namespace Template.Services.Saving
         {
             GameDataCache = new GameDataCache();
             IsGameDirty = false;
+            GameLoaded?.Invoke();
             return;
         }
 
@@ -142,7 +145,11 @@ namespace Template.Services.Saving
         // Capture current scene flags before writing
         CaptureFlagsForScene(SceneManager.GetActiveScene().name);
 
-        if (!IsGameDirty) return;
+        if (!IsGameDirty)
+        {
+            GameSaved?.Invoke();
+            return;
+        }
 
         var dto = new GameFileDto
         {
@@ -171,6 +178,7 @@ namespace Template.Services.Saving
         _storage.WriteAllBytes(gameFileName, bytes);
 
         IsGameDirty = false;
+        GameSaved?.Invoke();
     }
 
     public void DeleteGame()

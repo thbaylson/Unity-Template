@@ -19,6 +19,7 @@ MonoBehaviour:
   - prefab: {fileID: 286816949877644119, guid: bcc01f6b1efcaac459fddcc09e0e01aa, type: 3}
   - prefab: {fileID: 147148632797817898, guid: f022a769d96c9f34ea909d0e830a97e8, type: 3}
   - prefab: {fileID: 7345600012345678901, guid: 66329da358364b46be2154f5cf67cdd0, type: 3}
+  - prefab: {fileID: 7620000000000000000, guid: 2fd7ae10c6a04392a5e1f926a36b044c, type: 3}
   sceneProfiles:
   - sceneName: Title
     perSceneManagers:
@@ -42,3 +43,9 @@ MonoBehaviour:
     - {fileID: 1258918597769642642, guid: 6a8fa030b6857df42a45498ef92f63f9, type: 3}
     - {fileID: 7101777820484897687, guid: 58ccd4d51614b2f42b94ca24c11eea3c, type: 3}
     - {fileID: 7655372193881906233, guid: e973cb6fbcfbd6c42ab6a29f8a3fcb8a, type: 3}
+  - sceneName: MazeScene
+    perSceneManagers:
+    - {fileID: 1258918597769642642, guid: 6a8fa030b6857df42a45498ef92f63f9, type: 3}
+    - {fileID: 7101777820484897687, guid: 58ccd4d51614b2f42b94ca24c11eea3c, type: 3}
+    - {fileID: 7655372193881906233, guid: e973cb6fbcfbd6c42ab6a29f8a3fcb8a, type: 3}
+    - {fileID: 7610000000000000000, guid: 0e05f30b80f14a79b7c0d6998a2fc17a, type: 3}
