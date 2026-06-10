@@ -1,14 +1,14 @@
 # Unity Template Project
 
-This repository is a Unity 6 (6000.0.61f1) starter project with URP, Input System, Cinemachine, ProBuilder, and supporting tooling already wired in. It is intended to be forked to bootstrap new prototypes while keeping baseline systems consistent.
+This repository is a Unity 6 (6000.3.61f1) starter project with URP, Input System, Cinemachine, ProBuilder, and supporting tooling already wired in. It is intended to be forked to bootstrap new prototypes while keeping baseline systems consistent.
 
 ## Requirements
-- **Unity Editor**: 6000.0.61f1 (see `ProjectSettings/ProjectVersion.txt`).
+- **Unity Editor**: 6000.3.61f1 (see `ProjectSettings/ProjectVersion.txt`).
 - **Render Pipeline**: Universal Render Pipeline (URP 17.0.4).
 - **Platforms**: Windows and Web.
 
 ## Getting started
-1. Install Unity 6000.0.61f1 via Unity Hub.
+1. Install Unity 6000.3.61f1 via Unity Hub.
 2. Clone or fork this repository.
 3. Open the project in Unity Hub; the Editor will import packages defined in `Packages/manifest.json`.
 4. Open one of the sample scenes:
