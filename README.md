@@ -43,9 +43,12 @@ Key dependencies from `Packages/manifest.json`:
 
 ## Testing
 - **EditMode tests in the editor**: Open `Window > General > Test Runner`, switch to the `EditMode` tab, and run the suite.
+
 ## Credits
 - Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle
-- Sprites by SunGraphica: https://sungraphica.itch.io/
+- Achievement sprites by SunGraphica: https://sungraphica.itch.io/
+- Keyboard button sprites by greedy_toad: https://greedy-toad.itch.io/
+- Controller button sprites by dizeoakamatsu: https://dizeoakamatsu.itch.io/
 
 ## Supplemental design docs
 - `Docs/AchievementsSystemPlan.md` — implementation plan for an in-game, data-driven achievements system.
