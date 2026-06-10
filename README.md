@@ -43,6 +43,7 @@ Key dependencies from `Packages/manifest.json`:
 
 ## Testing
 - **EditMode tests in the editor**: Open `Window > General > Test Runner`, switch to the `EditMode` tab, and run the suite.
+- **WebGL Playwright smoke tests**: Run `npm.cmd install`, then `npm.cmd run test:webgl:smoke` to test an existing WebGL build or `npm.cmd run validate:webgl:smoke` to build and test. The harness serves `Build/WebGL` by default and writes screenshots under `tests/playwright/test-results/`.
 
 ## Credits
 - Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle

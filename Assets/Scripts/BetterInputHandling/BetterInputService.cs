@@ -11,6 +11,9 @@ namespace Template.BetterInputHandling
     public class BetterInputService : MonoBehaviour
     {
         [SerializeField] private BetterInputSettings settings;
+        [SerializeField, Min(0.01f)] private float stickActivityThreshold = 0.2f;
+        [SerializeField, Min(0.01f)] private float triggerActivityThreshold = 0.2f;
+        [SerializeField, Min(0.01f)] private float mouseDeltaThreshold = 0.01f;
 
         private PlayerInput playerInput;
         private InputActionRebindingExtensions.RebindingOperation rebindOperation;
@@ -58,6 +61,11 @@ namespace Template.BetterInputHandling
             UnregisterPlayerInput();
             rebindOperation?.Dispose();
             rebindOperation = null;
+        }
+
+        private void Update()
+        {
+            DetectPolledInputActivity();
         }
 
         public void RegisterPlayerInput(PlayerInput input)
@@ -306,6 +314,74 @@ namespace Template.BetterInputHandling
             {
                 SetActiveDevice(BetterInputDeviceProfile.FromPlayerInput(playerInput));
             }
+        }
+
+        private void DetectPolledInputActivity()
+        {
+            foreach (var gamepad in Gamepad.all)
+            {
+                if (WasGamepadUsed(gamepad))
+                {
+                    SetActiveDevice(BetterInputDeviceProfile.FromInputDevice(gamepad));
+                    return;
+                }
+            }
+
+            if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame)
+            {
+                SetActiveDevice(BetterInputDeviceProfile.FromInputDevice(Keyboard.current));
+                return;
+            }
+
+            if (Mouse.current != null && WasMouseUsed(Mouse.current))
+            {
+                SetActiveDevice(BetterInputDeviceProfile.FromInputDevice(Mouse.current));
+            }
+        }
+
+        private bool WasGamepadUsed(Gamepad gamepad)
+        {
+            if (gamepad == null)
+            {
+                return false;
+            }
+
+            var stickThresholdSquared = stickActivityThreshold * stickActivityThreshold;
+            return gamepad.buttonSouth.wasPressedThisFrame
+                   || gamepad.buttonEast.wasPressedThisFrame
+                   || gamepad.buttonWest.wasPressedThisFrame
+                   || gamepad.buttonNorth.wasPressedThisFrame
+                   || gamepad.startButton.wasPressedThisFrame
+                   || gamepad.selectButton.wasPressedThisFrame
+                   || gamepad.leftShoulder.wasPressedThisFrame
+                   || gamepad.rightShoulder.wasPressedThisFrame
+                   || gamepad.leftStickButton.wasPressedThisFrame
+                   || gamepad.rightStickButton.wasPressedThisFrame
+                   || gamepad.dpad.up.wasPressedThisFrame
+                   || gamepad.dpad.down.wasPressedThisFrame
+                   || gamepad.dpad.left.wasPressedThisFrame
+                   || gamepad.dpad.right.wasPressedThisFrame
+                   || gamepad.leftTrigger.ReadValue() > triggerActivityThreshold
+                   || gamepad.rightTrigger.ReadValue() > triggerActivityThreshold
+                   || gamepad.leftStick.ReadValue().sqrMagnitude > stickThresholdSquared
+                   || gamepad.rightStick.ReadValue().sqrMagnitude > stickThresholdSquared;
+        }
+
+        private bool WasMouseUsed(Mouse mouse)
+        {
+            if (mouse == null)
+            {
+                return false;
+            }
+
+            var mouseThresholdSquared = mouseDeltaThreshold * mouseDeltaThreshold;
+            return mouse.leftButton.wasPressedThisFrame
+                   || mouse.rightButton.wasPressedThisFrame
+                   || mouse.middleButton.wasPressedThisFrame
+                   || mouse.forwardButton.wasPressedThisFrame
+                   || mouse.backButton.wasPressedThisFrame
+                   || mouse.scroll.ReadValue().sqrMagnitude > mouseThresholdSquared
+                   || mouse.delta.ReadValue().sqrMagnitude > mouseThresholdSquared;
         }
 
         private void SetActiveDevice(BetterInputDeviceProfile deviceProfile)

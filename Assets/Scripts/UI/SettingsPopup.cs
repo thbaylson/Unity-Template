@@ -29,12 +29,12 @@ namespace Template.UI
         [SerializeField] private GameObject defaultSelected;
 
         private readonly List<ControlRow> controlRows = new List<ControlRow>();
+        private readonly List<GameObject> audioContentRoots = new List<GameObject>();
         private Action _onBack;
         private bool suppressSliderEvents;
         private bool hasBuiltTabs;
         private bool isRebinding;
         private SettingsTab activeTab = SettingsTab.Audio;
-        private GameObject audioContainer;
         private RectTransform controlsContainer;
         private Button audioTabButton;
         private Button controlsTabButton;
@@ -192,15 +192,13 @@ namespace Template.UI
                 return;
             }
 
-            audioContainer = masterSlider != null && masterSlider.transform.parent != null
-                ? masterSlider.transform.parent.gameObject
-                : null;
-
             var root = transform as RectTransform;
             if (root == null)
             {
                 return;
             }
+
+            CacheAudioContentRoots(root);
 
             var tabBar = CreateRect("BetterInputTabBar", root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(420f, 36f));
             var tabLayout = tabBar.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -290,9 +288,12 @@ namespace Template.UI
         private void SelectTab(SettingsTab tab)
         {
             activeTab = tab;
-            if (audioContainer != null)
+            foreach (var audioContentRoot in audioContentRoots)
             {
-                audioContainer.SetActive(activeTab == SettingsTab.Audio);
+                if (audioContentRoot != null)
+                {
+                    audioContentRoot.SetActive(activeTab == SettingsTab.Audio);
+                }
             }
 
             if (controlsContainer != null)
@@ -303,6 +304,23 @@ namespace Template.UI
             SetTabButtonSelected(audioTabButton, activeTab == SettingsTab.Audio);
             SetTabButtonSelected(controlsTabButton, activeTab == SettingsTab.Controls);
             RefreshControlRows();
+        }
+
+        private void CacheAudioContentRoots(RectTransform root)
+        {
+            audioContentRoots.Clear();
+
+            var sliderContainer = FindChildByName(root, "SliderContainer");
+            if (sliderContainer != null)
+            {
+                audioContentRoots.Add(sliderContainer.gameObject);
+                return;
+            }
+
+            if (masterSlider != null && masterSlider.transform.parent != null)
+            {
+                audioContentRoots.Add(masterSlider.transform.parent.gameObject);
+            }
         }
 
         private void SwitchTab(int direction)
@@ -424,6 +442,31 @@ namespace Template.UI
             var button = CreateButton($"{label}TabButton", parent, label, onClick);
             button.GetComponent<RectTransform>().sizeDelta = new Vector2(116f, 30f);
             return button;
+        }
+
+        private static Transform FindChildByName(Transform parent, string childName)
+        {
+            if (parent == null || string.IsNullOrWhiteSpace(childName))
+            {
+                return null;
+            }
+
+            for (var index = 0; index < parent.childCount; index++)
+            {
+                var child = parent.GetChild(index);
+                if (child.name == childName)
+                {
+                    return child;
+                }
+
+                var nestedChild = FindChildByName(child, childName);
+                if (nestedChild != null)
+                {
+                    return nestedChild;
+                }
+            }
+
+            return null;
         }
 
         private static Button CreateButton(string name, RectTransform parent, string label, UnityEngine.Events.UnityAction onClick)

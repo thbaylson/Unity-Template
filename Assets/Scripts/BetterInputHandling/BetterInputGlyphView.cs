@@ -16,15 +16,26 @@ namespace Template.BetterInputHandling
         [SerializeField] private string keyboardMouseControl = "<Keyboard>/escape";
         [SerializeField] private string gamepadControl = "<Gamepad>/start";
 
+        private BetterInputService subscribedService;
+
         private void OnEnable()
         {
-            Subscribe();
+            TrySubscribe();
             Refresh();
         }
 
         private void OnDisable()
         {
             Unsubscribe();
+        }
+
+        private void Update()
+        {
+            if (subscribedService == null)
+            {
+                TrySubscribe();
+                Refresh();
+            }
         }
 
         public void BindAction(BetterInputActionReference reference)
@@ -65,28 +76,30 @@ namespace Template.BetterInputHandling
             ApplyGlyph(glyph);
         }
 
-        private void Subscribe()
+        private void TrySubscribe()
         {
             var service = BetterInputService.Instance;
-            if (service == null)
+            if (service == null || subscribedService == service)
             {
                 return;
             }
 
-            service.ActiveDeviceChanged += OnActiveDeviceChanged;
-            service.BindingOverridesChanged += OnBindingOverridesChanged;
+            Unsubscribe();
+            subscribedService = service;
+            subscribedService.ActiveDeviceChanged += OnActiveDeviceChanged;
+            subscribedService.BindingOverridesChanged += OnBindingOverridesChanged;
         }
 
         private void Unsubscribe()
         {
-            var service = BetterInputService.Instance;
-            if (service == null)
+            if (subscribedService == null)
             {
                 return;
             }
 
-            service.ActiveDeviceChanged -= OnActiveDeviceChanged;
-            service.BindingOverridesChanged -= OnBindingOverridesChanged;
+            subscribedService.ActiveDeviceChanged -= OnActiveDeviceChanged;
+            subscribedService.BindingOverridesChanged -= OnBindingOverridesChanged;
+            subscribedService = null;
         }
 
         private void OnActiveDeviceChanged(BetterInputDeviceProfile _)

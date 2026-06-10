@@ -1,0 +1,18 @@
+{
+  "name": "template-webgl-smoke",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "latest"
+  },
+  "scripts": {
+    "build:webgl": "powershell -ExecutionPolicy Bypass -File ./ci/build-webgl.ps1",
+    "serve:webgl": "node ./tests/playwright/serve-unity-webgl.mjs --root ./Build/WebGL --port 4173",
+    "playwright:install": "playwright install chromium",
+    "playwright:test:webgl": "playwright test --config ./tests/playwright/playwright.config.js",
+    "playwright:test:webgl:headed": "playwright test --config ./tests/playwright/playwright.config.js --headed",
+    "test:webgl:smoke": "powershell -ExecutionPolicy Bypass -File ./ci/run-webgl-smoke-tests.ps1 -SkipBuild",
+    "test:webgl:smoke:headed": "powershell -ExecutionPolicy Bypass -File ./ci/run-webgl-smoke-tests.ps1 -SkipBuild -Headed",
+    "validate:webgl:smoke": "powershell -ExecutionPolicy Bypass -File ./ci/run-webgl-smoke-tests.ps1",
+    "validate:webgl:smoke:headed": "powershell -ExecutionPolicy Bypass -File ./ci/run-webgl-smoke-tests.ps1 -Headed"
+  }
+}

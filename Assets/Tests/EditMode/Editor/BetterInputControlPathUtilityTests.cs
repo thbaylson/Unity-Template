@@ -29,4 +29,13 @@ public class BetterInputControlPathUtilityTests
         Assert.That(BetterInputControlPathUtility.ToDisplayName("<Gamepad>/buttonNorth"), Is.EqualTo("Y"));
         Assert.That(BetterInputControlPathUtility.ToDisplayName("<Keyboard>/e"), Is.EqualTo("E"));
     }
+
+    [Test]
+    public void DeviceProfile_RecognizesPlayStationControlScheme()
+    {
+        var profile = BetterInputDeviceProfile.FromControlScheme("PS4 Controller", null);
+
+        Assert.That(profile.Kind, Is.EqualTo(BetterInputDeviceKind.PlayStationGamepad));
+        Assert.That(profile.IsGamepad, Is.True);
+    }
 }

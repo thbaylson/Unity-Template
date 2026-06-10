@@ -117,13 +117,26 @@ namespace Template.BetterInputHandling
             var displayName = gamepad?.displayName ?? "Gamepad";
             var normalizedLayout = layout.ToLowerInvariant();
             var normalizedDisplayName = displayName.ToLowerInvariant();
+            var compactLayout = BetterInputControlPathUtility.NormalizeBindingGroup(layout);
+            var compactDisplayName = BetterInputControlPathUtility.NormalizeBindingGroup(displayName);
+            var compactControlScheme = BetterInputControlPathUtility.NormalizeBindingGroup(controlScheme);
 
             if (normalizedLayout.Contains("dualshock")
                 || normalizedLayout.Contains("dualsense")
+                || normalizedLayout.Contains("playstation")
                 || normalizedDisplayName.Contains("dualshock")
                 || normalizedDisplayName.Contains("dualsense")
+                || normalizedDisplayName.Contains("dual sense")
                 || normalizedDisplayName.Contains("playstation")
-                || BetterInputControlPathUtility.NormalizeBindingGroup(controlScheme).Contains("ps"))
+                || normalizedDisplayName.Contains("sony")
+                || compactLayout.Contains("dualshock")
+                || compactLayout.Contains("dualsense")
+                || compactLayout.Contains("playstation")
+                || compactDisplayName.Contains("dualshock")
+                || compactDisplayName.Contains("dualsense")
+                || compactDisplayName.Contains("playstation")
+                || compactDisplayName.Contains("sony")
+                || compactControlScheme.Contains("ps"))
             {
                 return new BetterInputDeviceProfile(
                     BetterInputDeviceKind.PlayStationGamepad,
@@ -134,7 +147,7 @@ namespace Template.BetterInputHandling
 
             if (normalizedLayout.Contains("xinput")
                 || normalizedDisplayName.Contains("xbox")
-                || BetterInputControlPathUtility.NormalizeBindingGroup(controlScheme).Contains("xbox"))
+                || compactControlScheme.Contains("xbox"))
             {
                 return new BetterInputDeviceProfile(
                     BetterInputDeviceKind.XboxGamepad,

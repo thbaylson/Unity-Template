@@ -18,26 +18,33 @@ namespace Template.BetterInputHandling
         private float nextScanTime;
         private BetterInputPrompt activePrompt;
         private bool hasActivePrompt;
+        private CharacterController characterController;
+        private BetterInputService subscribedService;
+
+        private void Awake()
+        {
+            characterController = GetComponentInChildren<CharacterController>();
+        }
 
         private void OnEnable()
         {
-            if (BetterInputService.Instance != null)
-            {
-                BetterInputService.Instance.ActionPerformed += OnActionPerformed;
-            }
+            TrySubscribeToInputService();
         }
 
         private void OnDisable()
         {
-            if (BetterInputService.Instance != null)
+            if (subscribedService != null)
             {
-                BetterInputService.Instance.ActionPerformed -= OnActionPerformed;
-                BetterInputService.Instance.ClearCurrentPrompt();
+                subscribedService.ActionPerformed -= OnActionPerformed;
+                subscribedService.ClearCurrentPrompt();
+                subscribedService = null;
             }
         }
 
         private void Update()
         {
+            TrySubscribeToInputService();
+
             if (Time.unscaledTime < nextScanTime)
             {
                 return;
@@ -51,7 +58,7 @@ namespace Template.BetterInputHandling
         {
             visitedProviders.Clear();
 
-            var position = transform.position;
+            var position = GetScanPosition();
             var count = Physics.OverlapSphereNonAlloc(position, radius, colliderBuffer, promptLayers, triggerInteraction);
 
             var foundPrompt = default(BetterInputPrompt);
@@ -75,7 +82,7 @@ namespace Template.BetterInputHandling
 
                 visitedProviders.Add(providerComponent);
 
-                var distance = Vector3.Distance(position, collider.transform.position);
+                var distance = Vector3.Distance(position, collider.ClosestPoint(position));
                 var query = new BetterInputPromptQuery(transform, position, distance);
                 if (!provider.TryGetPrompt(query, out var prompt))
                 {
@@ -108,6 +115,30 @@ namespace Template.BetterInputHandling
             }
         }
 
+        private void TrySubscribeToInputService()
+        {
+            var service = BetterInputService.Instance;
+            if (service == null || subscribedService == service)
+            {
+                return;
+            }
+
+            if (subscribedService != null)
+            {
+                subscribedService.ActionPerformed -= OnActionPerformed;
+            }
+
+            subscribedService = service;
+            subscribedService.ActionPerformed += OnActionPerformed;
+        }
+
+        private Vector3 GetScanPosition()
+        {
+            return characterController != null
+                ? characterController.transform.TransformPoint(characterController.center)
+                : transform.position;
+        }
+
         private static MonoBehaviour FindPromptProvider(Collider source)
         {
             var components = source.GetComponentsInParent<MonoBehaviour>();
@@ -136,7 +167,7 @@ namespace Template.BetterInputHandling
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0.1f, 0.8f, 1f, 0.25f);
-            Gizmos.DrawSphere(transform.position, radius);
+            Gizmos.DrawSphere(GetScanPosition(), radius);
         }
     }
 }

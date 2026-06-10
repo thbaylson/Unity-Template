@@ -12,24 +12,28 @@ namespace Template.BetterInputHandling
         [SerializeField] private TMP_Text promptText;
         [SerializeField] private CanvasGroup canvasGroup;
 
+        private BetterInputService subscribedService;
+
         private void OnEnable()
         {
-            if (BetterInputService.Instance != null)
-            {
-                BetterInputService.Instance.CurrentPromptChanged += OnCurrentPromptChanged;
-                OnCurrentPromptChanged(BetterInputService.Instance.HasCurrentPrompt, BetterInputService.Instance.CurrentPrompt);
-            }
-            else
-            {
-                SetVisible(false);
-            }
+            TrySubscribe();
+            SetVisible(subscribedService != null && subscribedService.HasCurrentPrompt);
         }
 
         private void OnDisable()
         {
-            if (BetterInputService.Instance != null)
+            if (subscribedService != null)
             {
-                BetterInputService.Instance.CurrentPromptChanged -= OnCurrentPromptChanged;
+                subscribedService.CurrentPromptChanged -= OnCurrentPromptChanged;
+                subscribedService = null;
+            }
+        }
+
+        private void Update()
+        {
+            if (subscribedService == null)
+            {
+                TrySubscribe();
             }
         }
 
@@ -42,6 +46,19 @@ namespace Template.BetterInputHandling
             {
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
             }
+        }
+
+        private void TrySubscribe()
+        {
+            var service = BetterInputService.Instance;
+            if (service == null || subscribedService == service)
+            {
+                return;
+            }
+
+            subscribedService = service;
+            subscribedService.CurrentPromptChanged += OnCurrentPromptChanged;
+            OnCurrentPromptChanged(subscribedService.HasCurrentPrompt, subscribedService.CurrentPrompt);
         }
 
         private void OnCurrentPromptChanged(bool hasPrompt, BetterInputPrompt prompt)

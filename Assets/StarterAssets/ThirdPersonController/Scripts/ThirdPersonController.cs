@@ -127,14 +127,22 @@ namespace StarterAssets
             get
             {
 #if ENABLE_INPUT_SYSTEM
-                if (BetterInputService.Instance != null)
+                if (_playerInput != null && !string.IsNullOrWhiteSpace(_playerInput.currentControlScheme))
                 {
-                    return BetterInputService.Instance.ActiveDevice.Kind == BetterInputDeviceKind.KeyboardMouse;
+                    var normalizedScheme = BetterInputControlPathUtility.NormalizeBindingGroup(_playerInput.currentControlScheme);
+                    if (normalizedScheme == "keyboardmouse")
+                    {
+                        return true;
+                    }
+
+                    if (normalizedScheme.Contains("gamepad") || normalizedScheme.Contains("controller"))
+                    {
+                        return false;
+                    }
                 }
 
-                return _playerInput != null
-                       && (_playerInput.currentControlScheme == "KeyboardMouse"
-                           || _playerInput.currentControlScheme == "Keyboard&Mouse");
+                return BetterInputService.Instance != null
+                       && BetterInputService.Instance.ActiveDevice.Kind == BetterInputDeviceKind.KeyboardMouse;
 #else
 				return false;
 #endif

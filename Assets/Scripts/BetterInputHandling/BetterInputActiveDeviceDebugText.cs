@@ -10,20 +10,27 @@ namespace Template.BetterInputHandling
     {
         [SerializeField] private TMP_Text label;
 
+        private BetterInputService subscribedService;
+
         private void OnEnable()
         {
-            if (BetterInputService.Instance != null)
-            {
-                BetterInputService.Instance.ActiveDeviceChanged += OnActiveDeviceChanged;
-                OnActiveDeviceChanged(BetterInputService.Instance.ActiveDevice);
-            }
+            TrySubscribe();
         }
 
         private void OnDisable()
         {
-            if (BetterInputService.Instance != null)
+            if (subscribedService != null)
             {
-                BetterInputService.Instance.ActiveDeviceChanged -= OnActiveDeviceChanged;
+                subscribedService.ActiveDeviceChanged -= OnActiveDeviceChanged;
+                subscribedService = null;
+            }
+        }
+
+        private void Update()
+        {
+            if (subscribedService == null)
+            {
+                TrySubscribe();
             }
         }
 
@@ -34,6 +41,19 @@ namespace Template.BetterInputHandling
             {
                 OnActiveDeviceChanged(BetterInputService.Instance.ActiveDevice);
             }
+        }
+
+        private void TrySubscribe()
+        {
+            var service = BetterInputService.Instance;
+            if (service == null || subscribedService == service)
+            {
+                return;
+            }
+
+            subscribedService = service;
+            subscribedService.ActiveDeviceChanged += OnActiveDeviceChanged;
+            OnActiveDeviceChanged(subscribedService.ActiveDevice);
         }
 
         private void OnActiveDeviceChanged(BetterInputDeviceProfile profile)
