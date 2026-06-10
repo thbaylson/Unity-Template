@@ -2,6 +2,7 @@
 
 ## Environment
 - This is a Unity project targeting Windows first.
+- This project is meant to be used as a starting point for future projects.
 - Prefer Windows-native commands and PowerShell examples.
 - Do not assume WSL paths.
 
@@ -18,7 +19,7 @@
 - Do not add new dependencies without asking.
 - Prefer descriptive names over abbreviations; avoid single-letter identifiers except in tightly scoped loops.
 - Keep Unity `.meta` files in sync with their assets; commit them together.
-- Include descriptive summaries of added classes.
+- Classes must include descriptive XML documentation comments per standard convention.
 - Code comments should be on their own line and placed above the relevant code.
 - Document any new math-heavy calculations with comments. 
 - Avoid adding new comments around existing logic unless the change introduces new behavior.
@@ -41,4 +42,3 @@
 ## Output expectations
 - Summarize files changed, risks, and validation performed.
 - Flag anything that still requires manual editor verification.
-
