@@ -1,4 +1,5 @@
 using System;
+using Template.BetterInputHandling;
 using Template.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -53,6 +54,7 @@ namespace Template.Services
         public void RegisterPlayerInput(PlayerInput playerInput)
         {
             this.playerInput = playerInput;
+            BetterInputService.Instance?.RegisterPlayerInput(playerInput);
             ApplyInputMap();
         }
 
@@ -111,7 +113,15 @@ namespace Template.Services
         private void ApplyInputMap()
         {
             if (playerInput == null) return;
-            playerInput.SwitchCurrentActionMap(IsPaused ? uiMap : gameplayMap);
+
+            var targetMap = IsPaused ? uiMap : gameplayMap;
+            if (BetterInputService.Instance != null)
+            {
+                BetterInputService.Instance.SwitchCurrentActionMap(targetMap);
+                return;
+            }
+
+            playerInput.SwitchCurrentActionMap(targetMap);
         }
 
         private void OnDisable()

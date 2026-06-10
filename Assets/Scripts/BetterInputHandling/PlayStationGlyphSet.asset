@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0415b2291a64454beb99cee6cd24c05, type: 3}
+  m_Name: PlayStationGlyphSet
+  m_EditorClassIdentifier: Assembly-CSharp::Template.BetterInputHandling.BetterInputGlyphSet
+  deviceKind: 3
+  displayName: PlayStation Controller
+  entries:
+  - controlKey: start
+    sprite: {fileID: 21300000, guid: 606b43d685a91c8449ad36ce8032c084, type: 3}
+    textFallback: Options
+  - controlKey: select
+    sprite: {fileID: 21300000, guid: 2628c4d539978894c97443347add02b3, type: 3}
+    textFallback: Share
+  - controlKey: buttonSouth
+    sprite: {fileID: 21300000, guid: 273df8135aab2e04eb4ca7bf9cf66f96, type: 3}
+    textFallback: Cross
+  - controlKey: buttonEast
+    sprite: {fileID: 21300000, guid: 37d56d9f5f1ef0141865efb52b5501af, type: 3}
+    textFallback: Circle
+  - controlKey: buttonWest
+    sprite: {fileID: 21300000, guid: 33dfbec5725dd244ea4b8ad3bdf9825a, type: 3}
+    textFallback: Square
+  - controlKey: buttonNorth
+    sprite: {fileID: 21300000, guid: 092548734df34e0448b6ef87603206ef, type: 3}
+    textFallback: Triangle
+  - controlKey: leftShoulder
+    sprite: {fileID: 21300000, guid: acec34ce8d9c90b40a3823c411f27510, type: 3}
+    textFallback: L1
+  - controlKey: rightShoulder
+    sprite: {fileID: 21300000, guid: f2e38384ba0e3b64a80500899d9d7fe3, type: 3}
+    textFallback: R1
+  - controlKey: leftTrigger
+    sprite: {fileID: 21300000, guid: 67df50a9075f6f448bacba5e2c7acd86, type: 3}
+    textFallback: L2
+  - controlKey: rightTrigger
+    sprite: {fileID: 21300000, guid: 067406b2fec193b45b6b1e78113d099e, type: 3}
+    textFallback: R2

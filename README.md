@@ -52,6 +52,7 @@ Key dependencies from `Packages/manifest.json`:
 
 ## Supplemental design docs
 - `Docs/AchievementsSystemPlan.md` — implementation plan for an in-game, data-driven achievements system.
+- `Docs/BetterInputHandling.md` — setup and extraction notes for dynamic input glyphs, context-aware prompts, and control rebinding.
 
 ## Achievements system
 - **Runtime service (`Assets/Scripts/Achievements/AchievementService.cs`)**: Tracks unlock progress, syncs with save data, and emits unlock/change events. Instantiated from `Assets/Prefabs/AchievementService.prefab` via `Assets/Resources/Config/BootstrapConfig.asset`.
