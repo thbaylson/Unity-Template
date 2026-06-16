@@ -156,6 +156,21 @@ namespace Template.BetterInputHandling
                     new[] { "Gamepad", "Xbox Controller", "XInput", "XboxGamepad" });
             }
 
+            if (normalizedLayout.Contains("switch")
+                || normalizedDisplayName.Contains("switch")
+                || normalizedDisplayName.Contains("nintendo")
+                || compactLayout.Contains("switch")
+                || compactDisplayName.Contains("switch")
+                || compactDisplayName.Contains("nintendo")
+                || compactControlScheme.Contains("switch"))
+            {
+                return new BetterInputDeviceProfile(
+                    BetterInputDeviceKind.GenericGamepad,
+                    displayName,
+                    "Switch Controller",
+                    new[] { "Switch Controller", "SwitchProControllerHID", "Gamepad" });
+            }
+
             return new BetterInputDeviceProfile(
                 BetterInputDeviceKind.GenericGamepad,
                 displayName,

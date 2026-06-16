@@ -1,5 +1,5 @@
 {
-  "name": "template-webgl-smoke",
+  "name": "template-webgl-validation",
   "private": true,
   "devDependencies": {
     "@playwright/test": "latest"

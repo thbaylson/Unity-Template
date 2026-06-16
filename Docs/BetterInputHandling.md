@@ -40,6 +40,10 @@ Playwright is part of the BetterInputHandling validation loop. After input, paus
 
 Chromium Playwright cannot reliably emulate a physical controller START button for Unity WebGL. For controller-only regressions, keep the closest keyboard/gamepad-path surrogate in Playwright and document the remaining manual hardware check in the bug or PR notes.
 
+### Future Gamepad API Mocking Spike
+
+A future validation spike should test whether Playwright can mock `navigator.getGamepads()` before Unity WebGL boots, dispatch a `gamepadconnected` event, and mutate fake button/axis state during tests. If Unity's WebGL input layer accepts that mocked Gamepad API state, we can add automated controller-specific coverage without requiring physical hardware in the loop. If Unity bypasses or snapshots the browser mock, keep using Playwright for close UI/input surrogates and reserve physical controller coverage for manual or hardware-in-the-loop validation.
+
 ## Package Extraction Notes
 
 When extracting this into another project, move the portable scripts and assets into an embedded package, then replace or remove the template-specific pieces:

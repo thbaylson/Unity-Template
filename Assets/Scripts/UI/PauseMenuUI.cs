@@ -7,6 +7,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace Template.UI
 {
+    /// <summary>
+    /// Controls the pause menu, including button actions and deterministic menu navigation.
+    /// </summary>
     [MovedFrom(true, null, "Assembly-CSharp", "PauseMenuUI")]
     public class PauseMenuUI : MonoBehaviour
     {
@@ -50,6 +53,8 @@ namespace Template.UI
             if (saveButton) saveButton.onClick.AddListener(Save);
             if (settingsButton) settingsButton.onClick.AddListener(Settings);
             if (achievementsButton) achievementsButton.onClick.AddListener(Achievements);
+
+            ConfigureButtonNavigation();
         }
 
         public void Resume()
@@ -121,6 +126,31 @@ namespace Template.UI
             {
                 graphic.raycastTarget = false;
             }
+        }
+
+        private void ConfigureButtonNavigation()
+        {
+            SetExplicitNavigation(resumeButton, null, saveButton);
+            SetExplicitNavigation(saveButton, resumeButton, achievementsButton);
+            SetExplicitNavigation(achievementsButton, saveButton, settingsButton);
+            SetExplicitNavigation(settingsButton, achievementsButton, returnToTitleButton);
+            SetExplicitNavigation(returnToTitleButton, settingsButton, null);
+        }
+
+        private static void SetExplicitNavigation(Selectable selectable, Selectable up, Selectable down)
+        {
+            if (selectable == null)
+            {
+                return;
+            }
+
+            var navigation = selectable.navigation;
+            navigation.mode = Navigation.Mode.Explicit;
+            navigation.selectOnUp = up;
+            navigation.selectOnDown = down;
+            navigation.selectOnLeft = null;
+            navigation.selectOnRight = null;
+            selectable.navigation = navigation;
         }
     }
 }

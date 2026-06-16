@@ -57,6 +57,11 @@ async function captureCanvas(canvas, testInfo, fileName) {
   return canvas.screenshot({ path: testInfo.outputPath(fileName) });
 }
 
+async function pressNavigationKey(page, key, delayMs = 100) {
+  await page.keyboard.press(key);
+  await page.waitForTimeout(delayMs);
+}
+
 function bufferDifferenceRatio(first, second) {
   const comparedLength = Math.min(first.length, second.length);
   if (comparedLength === 0) {
@@ -92,7 +97,78 @@ test("settings tabs render as a cohesive audio-to-controls flow", async ({ page 
   await page.waitForTimeout(750);
   const controlsTab = await captureCanvas(canvas, testInfo, "settings-controls-tab.png");
 
+  await page.keyboard.press("ArrowRight");
+  await page.waitForTimeout(250);
+  const controlsNavigation = await captureCanvas(canvas, testInfo, "settings-controls-navigation.png");
+
+  for (let index = 0; index < 12; index += 1) {
+    await pressNavigationKey(page, "ArrowDown", 50);
+  }
+
+  await pressNavigationKey(page, "Enter", 50);
+  await page.waitForTimeout(750);
+  const closedFromControls = await captureCanvas(canvas, testInfo, "settings-controls-closed-from-save-close.png");
+
   expect(bufferDifferenceRatio(audioTab, controlsTab)).toBeGreaterThan(0.05);
+  expect(bufferDifferenceRatio(controlsTab, controlsNavigation)).toBeGreaterThan(0.001);
+  expect(bufferDifferenceRatio(controlsTab, closedFromControls)).toBeGreaterThan(0.05);
+  expect(browserErrors).toEqual([]);
+});
+
+test("pause menu keeps deterministic vertical navigation order", async ({ page }, testInfo) => {
+  const browserErrors = collectBrowserErrors(page);
+  const canvas = await loadUnity(page);
+  await startFlatScene(page, canvas);
+
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+
+  await pressNavigationKey(page, "ArrowDown");
+  await pressNavigationKey(page, "ArrowDown");
+  await page.waitForTimeout(250);
+  const achievementsSelected = await captureCanvas(canvas, testInfo, "pause-achievements-selected.png");
+
+  await pressNavigationKey(page, "ArrowDown");
+  await page.waitForTimeout(250);
+  const settingsSelected = await captureCanvas(canvas, testInfo, "pause-settings-selected.png");
+
+  await pressNavigationKey(page, "ArrowUp");
+  await page.waitForTimeout(250);
+  const upFromSettings = await captureCanvas(canvas, testInfo, "pause-up-from-settings.png");
+
+  await pressNavigationKey(page, "ArrowDown");
+  await pressNavigationKey(page, "ArrowDown");
+  await pressNavigationKey(page, "ArrowUp");
+  await page.waitForTimeout(250);
+  const upFromReturnToTitle = await captureCanvas(canvas, testInfo, "pause-up-from-return-to-title.png");
+
+  expect(bufferDifferenceRatio(achievementsSelected, upFromSettings)).toBeLessThan(0.01);
+  expect(bufferDifferenceRatio(settingsSelected, upFromReturnToTitle)).toBeLessThan(0.01);
+  expect(browserErrors).toEqual([]);
+});
+
+test("title screen remains navigable after returning from an opened pause menu", async ({ page }, testInfo) => {
+  const browserErrors = collectBrowserErrors(page);
+  const canvas = await loadUnity(page);
+  await startFlatScene(page, canvas);
+
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(500);
+
+  for (let index = 0; index < 4; index += 1) {
+    await pressNavigationKey(page, "ArrowDown");
+  }
+
+  await pressNavigationKey(page, "Enter");
+  await page.waitForTimeout(2000);
+  const returnedTitle = await captureCanvas(canvas, testInfo, "title-after-pause-return.png");
+
+  await pressNavigationKey(page, "ArrowDown");
+  await pressNavigationKey(page, "Enter");
+  await page.waitForTimeout(750);
+  const settingsFromReturnedTitle = await captureCanvas(canvas, testInfo, "settings-from-returned-title-navigation.png");
+
+  expect(bufferDifferenceRatio(returnedTitle, settingsFromReturnedTitle)).toBeGreaterThan(0.05);
   expect(browserErrors).toEqual([]);
 });
 

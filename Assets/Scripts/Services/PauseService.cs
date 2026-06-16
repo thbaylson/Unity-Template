@@ -22,6 +22,9 @@ namespace Template.Services
         public void SetUIFocus(bool isFocused);
     }
 
+    /// <summary>
+    /// Coordinates paused gameplay state, pause-menu visibility, and gameplay/UI action-map ownership.
+    /// </summary>
     [MovedFrom(true, null, "Assembly-CSharp", "PauseService")]
     public class PauseService : MonoBehaviour, IPauseService
     {
@@ -137,10 +140,51 @@ namespace Template.Services
             if (BetterInputService.Instance != null)
             {
                 BetterInputService.Instance.SwitchCurrentActionMap(targetMap);
+                ConfigureUiModuleForPauseState();
                 return;
             }
 
             playerInput.SwitchCurrentActionMap(targetMap);
+            ConfigureUiModuleForPauseState();
+        }
+
+        private void ConfigureUiModuleForPauseState()
+        {
+            var uiModule = EventSystem.current?.GetComponent<InputSystemUIInputModule>();
+            if (uiModule == null)
+            {
+                return;
+            }
+
+            if (IsPaused)
+            {
+                EnableUiAction(uiModule.point);
+                EnableUiAction(uiModule.leftClick);
+                EnableUiAction(uiModule.middleClick);
+                EnableUiAction(uiModule.rightClick);
+                EnableUiAction(uiModule.scrollWheel);
+                EnableUiAction(uiModule.move);
+                EnableUiAction(uiModule.submit);
+                EnableUiAction(uiModule.cancel);
+                return;
+            }
+
+            DisableUiAction(uiModule.point);
+            DisableUiAction(uiModule.leftClick);
+            DisableUiAction(uiModule.middleClick);
+            DisableUiAction(uiModule.rightClick);
+            DisableUiAction(uiModule.scrollWheel);
+            DisableUiAction(uiModule.cancel);
+        }
+
+        private static void EnableUiAction(InputActionReference actionReference)
+        {
+            actionReference?.action?.Enable();
+        }
+
+        private static void DisableUiAction(InputActionReference actionReference)
+        {
+            actionReference?.action?.Disable();
         }
 
         private void RegisterPlayerInputWithUiModule()

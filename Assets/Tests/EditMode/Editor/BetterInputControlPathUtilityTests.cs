@@ -23,6 +23,14 @@ public class BetterInputControlPathUtilityTests
     }
 
     [Test]
+    public void BindingMatchesAnyGroup_MatchesSwitchControllerAliases()
+    {
+        var groups = new[] { "Switch Controller", "Gamepad" };
+
+        Assert.That(BetterInputControlPathUtility.BindingMatchesAnyGroup("Switch Controller;Gamepad", groups), Is.True);
+    }
+
+    [Test]
     public void ToDisplayName_ProvidesReadableFallbacks()
     {
         Assert.That(BetterInputControlPathUtility.ToDisplayName("<Keyboard>/escape"), Is.EqualTo("Esc"));
@@ -36,6 +44,16 @@ public class BetterInputControlPathUtilityTests
         var profile = BetterInputDeviceProfile.FromControlScheme("PS4 Controller", null);
 
         Assert.That(profile.Kind, Is.EqualTo(BetterInputDeviceKind.PlayStationGamepad));
+        Assert.That(profile.IsGamepad, Is.True);
+    }
+
+    [Test]
+    public void DeviceProfile_RecognizesSwitchControlScheme()
+    {
+        var profile = BetterInputDeviceProfile.FromControlScheme("Switch Controller", null);
+
+        Assert.That(profile.Kind, Is.EqualTo(BetterInputDeviceKind.GenericGamepad));
+        Assert.That(profile.PrimaryBindingGroup, Is.EqualTo("Switch Controller"));
         Assert.That(profile.IsGamepad, Is.True);
     }
 }

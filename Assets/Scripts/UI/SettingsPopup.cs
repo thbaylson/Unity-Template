@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using ServiceLocator = Template.Services.Services;
@@ -41,6 +42,11 @@ namespace Template.UI
         private BetterInputGlyphView previousTabGlyph;
         private BetterInputGlyphView nextTabGlyph;
         private GameObject controlsDefaultSelected;
+        private Button controlsResetAllButton;
+        private static readonly Color GeneratedButtonNormalColor = new Color(1f, 1f, 1f, 0.18f);
+        private static readonly Color GeneratedButtonHighlightedColor = new Color(0.8862745f, 0.7254902f, 0f, 1f);
+        private static readonly Color GeneratedButtonPressedColor = new Color(0.78431374f, 0.78431374f, 0.78431374f, 1f);
+        private static readonly Color GeneratedButtonDisabledColor = new Color(0.78431374f, 0.78431374f, 0.78431374f, 0.5019608f);
 
         private enum SettingsTab
         {
@@ -230,6 +236,7 @@ namespace Template.UI
         {
             controlRows.Clear();
             controlsDefaultSelected = null;
+            controlsResetAllButton = null;
 
             var header = CreateText("ControlsHeader", controlsContainer, "Controls", 22f, TextAlignmentOptions.Center);
             header.rectTransform.sizeDelta = new Vector2(620f, 30f);
@@ -250,6 +257,8 @@ namespace Template.UI
 
             var resetAll = CreateButton("ResetAllBindingsButton", controlsContainer, "Reset All", ResetAllBindings);
             resetAll.GetComponent<RectTransform>().sizeDelta = new Vector2(160f, 30f);
+            controlsResetAllButton = resetAll;
+            ConfigureControlsNavigation();
             RefreshControlRows();
         }
 
@@ -308,6 +317,8 @@ namespace Template.UI
                 controlsContainer.gameObject.SetActive(activeTab == SettingsTab.Controls);
             }
 
+            ConfigureTabNavigation();
+            ConfigureCloseButtonNavigation();
             SetTabButtonSelected(audioTabButton, activeTab == SettingsTab.Audio);
             SetTabButtonSelected(controlsTabButton, activeTab == SettingsTab.Controls);
             RefreshControlRows();
@@ -365,6 +376,94 @@ namespace Template.UI
             SelectTab(activeTab == SettingsTab.Audio ? SettingsTab.Controls : SettingsTab.Audio);
         }
 
+        private void ConfigureControlsNavigation()
+        {
+            for (var index = 0; index < controlRows.Count; index++)
+            {
+                var row = controlRows[index];
+                var previousRow = index > 0 ? controlRows[index - 1] : null;
+                var nextRow = index < controlRows.Count - 1 ? controlRows[index + 1] : null;
+
+                SetExplicitNavigation(
+                    row.RebindButton,
+                    previousRow?.RebindButton ?? controlsTabButton,
+                    nextRow?.RebindButton ?? controlsResetAllButton,
+                    null,
+                    row.ResetButton);
+
+                SetExplicitNavigation(
+                    row.ResetButton,
+                    previousRow?.ResetButton ?? controlsTabButton,
+                    nextRow?.ResetButton ?? controlsResetAllButton,
+                    row.RebindButton,
+                    null);
+            }
+
+            if (controlsResetAllButton != null)
+            {
+                var lastRow = controlRows.Count > 0 ? controlRows[controlRows.Count - 1] : null;
+                SetExplicitNavigation(
+                    controlsResetAllButton,
+                    lastRow?.RebindButton ?? controlsTabButton,
+                    closeButton,
+                    null,
+                    null);
+            }
+        }
+
+        private void ConfigureTabNavigation()
+        {
+            var audioDefault = defaultSelected != null ? defaultSelected.GetComponent<Selectable>() : null;
+            var controlsDefault = controlsDefaultSelected != null ? controlsDefaultSelected.GetComponent<Selectable>() : null;
+
+            SetExplicitNavigation(audioTabButton, null, audioDefault, null, controlsTabButton);
+            SetExplicitNavigation(controlsTabButton, null, controlsDefault, audioTabButton, null);
+        }
+
+        private void ConfigureCloseButtonNavigation()
+        {
+            if (activeTab == SettingsTab.Controls)
+            {
+                SetExplicitNavigation(closeButton, controlsResetAllButton, null, null, null);
+                return;
+            }
+
+            SetAutomaticNavigation(closeButton);
+        }
+
+        private static void SetExplicitNavigation(
+            Selectable selectable,
+            Selectable up,
+            Selectable down,
+            Selectable left,
+            Selectable right)
+        {
+            if (selectable == null)
+            {
+                return;
+            }
+
+            var navigation = selectable.navigation;
+            navigation.mode = Navigation.Mode.Explicit;
+            navigation.selectOnUp = up;
+            navigation.selectOnDown = down;
+            navigation.selectOnLeft = left;
+            navigation.selectOnRight = right;
+            selectable.navigation = navigation;
+        }
+
+        private static void SetAutomaticNavigation(Selectable selectable)
+        {
+            if (selectable == null)
+            {
+                return;
+            }
+
+            var navigation = selectable.navigation;
+            navigation.mode = Navigation.Mode.Automatic;
+            selectable.navigation = navigation;
+        }
+
         private void StartRebind(ControlRow row)
         {
             var service = BetterInputService.Instance;
@@ -385,6 +484,7 @@ namespace Template.UI
                     isRebinding = false;
                     SetControlRowsInteractable(true);
                     RefreshControlRows();
+                    RestoreSelectionAfterFrame(row.RebindButton);
                 });
         }
 
@@ -392,12 +492,14 @@ namespace Template.UI
         {
             BetterInputService.Instance?.ResetBinding(row.Action.ActionReference);
             RefreshControlRows();
+            RestoreSelectionAfterFrame(row.ResetButton);
         }
 
         private void ResetAllBindings()
         {
             BetterInputService.Instance?.ResetAllBindings();
             RefreshControlRows();
+            RestoreSelectionAfterFrame(controlsResetAllButton);
         }
 
         private void RefreshControlRows()
@@ -416,6 +518,26 @@ namespace Template.UI
             {
                 row.RebindButton.interactable = interactable;
                 row.ResetButton.interactable = interactable;
+            }
+        }
+
+        private void RestoreSelectionAfterFrame(Button button)
+        {
+            if (!isActiveAndEnabled || button == null)
+            {
+                return;
+            }
+
+            StartCoroutine(RestoreSelectionAfterFrameRoutine(button));
+        }
+
+        private static IEnumerator RestoreSelectionAfterFrameRoutine(Button button)
+        {
+            yield return null;
+
+            if (EventSystem.current != null && button != null && button.interactable && button.gameObject.activeInHierarchy)
+            {
+                EventSystem.current.SetSelectedGameObject(button.gameObject);
             }
         }
 
@@ -465,7 +587,7 @@ namespace Template.UI
             var image = button.GetComponent<Image>();
             if (image != null)
             {
-                image.color = selected ? new Color(1f, 0.82f, 0.12f, 0.92f) : new Color(1f, 1f, 1f, 0.18f);
+                image.color = selected ? GeneratedButtonHighlightedColor : GeneratedButtonNormalColor;
             }
         }
 
@@ -505,9 +627,10 @@ namespace Template.UI
         {
             var rect = CreateRect(name, parent, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100f, 30f));
             var image = rect.gameObject.AddComponent<Image>();
-            image.color = new Color(1f, 1f, 1f, 0.18f);
+            image.color = GeneratedButtonNormalColor;
 
             var button = rect.gameObject.AddComponent<Button>();
+            ConfigureGeneratedButtonVisuals(button, image);
             if (onClick != null)
             {
                 button.onClick.AddListener(onClick);
@@ -522,6 +645,21 @@ namespace Template.UI
             text.fontSizeMin = 10f;
             text.fontSizeMax = 15f;
             return button;
+        }
+
+        private static void ConfigureGeneratedButtonVisuals(Button button, Graphic targetGraphic)
+        {
+            button.targetGraphic = targetGraphic;
+
+            var colors = button.colors;
+            colors.normalColor = GeneratedButtonNormalColor;
+            colors.highlightedColor = GeneratedButtonHighlightedColor;
+            colors.selectedColor = GeneratedButtonHighlightedColor;
+            colors.pressedColor = GeneratedButtonPressedColor;
+            colors.disabledColor = GeneratedButtonDisabledColor;
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.1f;
+            button.colors = colors;
         }
 
         private static BetterInputGlyphView CreateGlyph(string name, RectTransform parent, Vector2 size)

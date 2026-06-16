@@ -404,17 +404,20 @@ namespace Template.BetterInputHandling
             }
 
             var groups = GetActiveBindingGroups();
-            for (var i = 0; i < action.bindings.Count; i++)
+            foreach (var group in groups)
             {
-                var binding = action.bindings[i];
-                if (binding.isComposite || binding.isPartOfComposite)
+                for (var i = 0; i < action.bindings.Count; i++)
                 {
-                    continue;
-                }
+                    var binding = action.bindings[i];
+                    if (binding.isComposite || binding.isPartOfComposite)
+                    {
+                        continue;
+                    }
 
-                if (BetterInputControlPathUtility.BindingMatchesAnyGroup(binding.groups, groups))
-                {
-                    return i;
+                    if (BetterInputControlPathUtility.BindingMatchesAnyGroup(binding.groups, new[] { group }))
+                    {
+                        return i;
+                    }
                 }
             }
 
