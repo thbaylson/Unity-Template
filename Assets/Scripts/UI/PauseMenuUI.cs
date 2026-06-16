@@ -7,6 +7,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace Template.UI
 {
+    /// <summary>
+    /// Controls the pause menu, including button actions and deterministic menu navigation.
+    /// </summary>
     [MovedFrom(true, null, "Assembly-CSharp", "PauseMenuUI")]
     public class PauseMenuUI : MonoBehaviour
     {
@@ -43,12 +46,15 @@ namespace Template.UI
             ServiceLocator.PauseService?.RegisterMenu(this);
 
             GetComponent<UILayerAttachment>()?.AttachToLayer();
+            DisableContainerRaycast(buttonContainer);
 
             if (resumeButton) resumeButton.onClick.AddListener(Resume);
             if (returnToTitleButton) returnToTitleButton.onClick.AddListener(ReturnToTitle);
             if (saveButton) saveButton.onClick.AddListener(Save);
             if (settingsButton) settingsButton.onClick.AddListener(Settings);
             if (achievementsButton) achievementsButton.onClick.AddListener(Achievements);
+
+            ConfigureButtonNavigation();
         }
 
         public void Resume()
@@ -97,6 +103,7 @@ namespace Template.UI
             // Make gamepad/keyboard navigation work immediately when the menu opens.
             if (paused && EventSystem.current != null && resumeButton != null)
             {
+                UIModeSwitcher.Instance?.ShowPointer();
                 EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
             }
         }
@@ -105,6 +112,45 @@ namespace Template.UI
         {
             SetVisible(true);
             ServiceLocator.PauseService?.SetUIFocus(true);
+        }
+
+        private static void DisableContainerRaycast(GameObject container)
+        {
+            if (container == null)
+            {
+                return;
+            }
+
+            var graphic = container.GetComponent<Graphic>();
+            if (graphic != null)
+            {
+                graphic.raycastTarget = false;
+            }
+        }
+
+        private void ConfigureButtonNavigation()
+        {
+            SetExplicitNavigation(resumeButton, null, saveButton);
+            SetExplicitNavigation(saveButton, resumeButton, achievementsButton);
+            SetExplicitNavigation(achievementsButton, saveButton, settingsButton);
+            SetExplicitNavigation(settingsButton, achievementsButton, returnToTitleButton);
+            SetExplicitNavigation(returnToTitleButton, settingsButton, null);
+        }
+
+        private static void SetExplicitNavigation(Selectable selectable, Selectable up, Selectable down)
+        {
+            if (selectable == null)
+            {
+                return;
+            }
+
+            var navigation = selectable.navigation;
+            navigation.mode = Navigation.Mode.Explicit;
+            navigation.selectOnUp = up;
+            navigation.selectOnDown = down;
+            navigation.selectOnLeft = null;
+            navigation.selectOnRight = null;
+            selectable.navigation = navigation;
         }
     }
 }

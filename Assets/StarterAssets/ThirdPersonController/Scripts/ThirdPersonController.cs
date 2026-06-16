@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Template.BetterInputHandling;
 using ServiceLocator = Template.Services.Services;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
@@ -126,7 +127,22 @@ namespace StarterAssets
             get
             {
 #if ENABLE_INPUT_SYSTEM
-                return _playerInput.currentControlScheme == "KeyboardMouse";
+                if (_playerInput != null && !string.IsNullOrWhiteSpace(_playerInput.currentControlScheme))
+                {
+                    var normalizedScheme = BetterInputControlPathUtility.NormalizeBindingGroup(_playerInput.currentControlScheme);
+                    if (normalizedScheme == "keyboardmouse")
+                    {
+                        return true;
+                    }
+
+                    if (normalizedScheme.Contains("gamepad") || normalizedScheme.Contains("controller"))
+                    {
+                        return false;
+                    }
+                }
+
+                return BetterInputService.Instance != null
+                       && BetterInputService.Instance.ActiveDevice.Kind == BetterInputDeviceKind.KeyboardMouse;
 #else
 				return false;
 #endif
@@ -136,8 +152,6 @@ namespace StarterAssets
 
         private void Awake()
         {
-            ServiceLocator.PauseService?.RegisterPlayerInput(_playerInput);
-
             // get a reference to our main camera
             if (_mainCamera == null)
             {
@@ -154,6 +168,8 @@ namespace StarterAssets
             _input = GetComponent<StarterAssetsInputs>();
 #if ENABLE_INPUT_SYSTEM 
             _playerInput = GetComponent<PlayerInput>();
+            BetterInputService.Instance?.RegisterPlayerInput(_playerInput);
+            ServiceLocator.PauseService?.RegisterPlayerInput(_playerInput);
 #else
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif

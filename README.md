@@ -43,12 +43,18 @@ Key dependencies from `Packages/manifest.json`:
 
 ## Testing
 - **EditMode tests in the editor**: Open `Window > General > Test Runner`, switch to the `EditMode` tab, and run the suite.
+- **WebGL Playwright validation**: Playwright is part of the input/UI validation workflow, not just a smoke test. Run `npm.cmd install`, then `npm.cmd run test:webgl` to test an existing WebGL build or `npm.cmd run validate:webgl` to build and test. The suite serves `Build/WebGL`, drives representative title/settings/pause flows, and writes screenshots, traces, and videos under `tests/playwright/test-results/` for review. The older `*:smoke` npm aliases still run the same validation suite for compatibility.
+- **When changing UI or input**: Add or update a Playwright path for reproducible visual/input bugs when feasible. If a bug needs hardware that Chromium cannot emulate reliably, document the manual coverage gap and keep the automated surrogate as close as practical.
+
 ## Credits
 - Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle
-- Sprites by SunGraphica: https://sungraphica.itch.io/
+- Achievement sprites by SunGraphica: https://sungraphica.itch.io/
+- Keyboard button sprites by greedy_toad: https://greedy-toad.itch.io/
+- Controller button sprites by dizeoakamatsu: https://dizeoakamatsu.itch.io/
 
 ## Supplemental design docs
 - `Docs/AchievementsSystemPlan.md` — implementation plan for an in-game, data-driven achievements system.
+- `Docs/BetterInputHandling.md` — setup and extraction notes for dynamic input glyphs, context-aware prompts, and control rebinding.
 
 ## Achievements system
 - **Runtime service (`Assets/Scripts/Achievements/AchievementService.cs`)**: Tracks unlock progress, syncs with save data, and emits unlock/change events. Instantiated from `Assets/Prefabs/AchievementService.prefab` via `Assets/Resources/Config/BootstrapConfig.asset`.
