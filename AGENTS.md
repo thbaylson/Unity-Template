@@ -35,7 +35,8 @@
 
 ## Testing
 - Prefer EditMode or pure C# tests first.
-- Use PlayMode tests only when runtime behavior is required.
+- Use PlayMode tests when runtime behavior is required.
+- Use PlayWright tests to validate UI, visual assets, or general aesthetics.
 - After changing gameplay code, run the relevant test action if available.
 - If no automated test exists, propose one.
 
