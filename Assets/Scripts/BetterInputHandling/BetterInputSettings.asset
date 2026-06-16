@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96c074f0a37e444888b5785c49030fec, type: 3}
+  m_Name: BetterInputSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Template.BetterInputHandling.BetterInputSettings
+  inputActions: {fileID: -944628639613478452, guid: 4419d82f33d36e848b3ed5af4c8da37e, type: 3}
+  gameplayActionMap: Player
+  uiActionMap: UI
+  bindingOverridesPlayerPrefsKey: betterInput.bindingOverrides
+  keyboardMouseGlyphSet: {fileID: 11400000, guid: 57003fd4b47969e49851cdab4e3e798a, type: 2}
+  xboxGlyphSet: {fileID: 11400000, guid: c627b2e0985ab004f852940ce905f243, type: 2}
+  playStationGlyphSet: {fileID: 11400000, guid: adc66e865a36ad042b14ad533fced6dd, type: 2}
+  genericGamepadGlyphSet: {fileID: 11400000, guid: a7ace38497dc58342878f505e62f28e4, type: 2}
+  remappableActions:
+  - displayName: Pause
+    actionReference:
+      actionMapName: Player
+      actionName: Pause
+  - displayName: Interact
+    actionReference:
+      actionMapName: Player
+      actionName: Interact
+  - displayName: Jump
+    actionReference:
+      actionMapName: Player
+      actionName: Jump
+  - displayName: Sprint
+    actionReference:
+      actionMapName: Player
+      actionName: Sprint
+  - displayName: Emote Up
+    actionReference:
+      actionMapName: Player
+      actionName: EmoteUp
+  - displayName: Emote Down
+    actionReference:
+      actionMapName: Player
+      actionName: EmoteDown
+  - displayName: Emote Left
+    actionReference:
+      actionMapName: Player
+      actionName: EmoteLeft
+  - displayName: Emote Right
+    actionReference:
+      actionMapName: Player
+      actionName: EmoteRight

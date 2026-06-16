@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0415b2291a64454beb99cee6cd24c05, type: 3}
+  m_Name: KeyboardMouseGlyphSet
+  m_EditorClassIdentifier: Assembly-CSharp::Template.BetterInputHandling.BetterInputGlyphSet
+  deviceKind: 1
+  displayName: Keyboard & Mouse
+  entries:
+  - controlKey: esc
+    sprite: {fileID: -949120616, guid: 3d09901ae3020404fb0e819d3d6c9964, type: 3}
+    textFallback: Esc
+  - controlKey: e
+    sprite: {fileID: -120398139, guid: 3d09901ae3020404fb0e819d3d6c9964, type: 3}
+    textFallback: E
+  - controlKey: q
+    sprite: {fileID: -1445093099, guid: 3d09901ae3020404fb0e819d3d6c9964, type: 3}
+    textFallback: Q
+  - controlKey: spacebar
+    sprite: {fileID: -424921815, guid: 3d09901ae3020404fb0e819d3d6c9964, type: 3}
+    textFallback: Space
+  - controlKey: shift
+    sprite: {fileID: 2060178638, guid: 3d09901ae3020404fb0e819d3d6c9964, type: 3}
+    textFallback: Shift
+  - controlKey: enter
+    sprite: {fileID: -327417665, guid: 3d09901ae3020404fb0e819d3d6c9964, type: 3}
+    textFallback: Enter
+  - controlKey: leftButton
+    sprite: {fileID: 0}
+    textFallback: LMB

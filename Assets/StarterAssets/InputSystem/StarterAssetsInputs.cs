@@ -1,4 +1,5 @@
 using ServiceLocator = Template.Services.Services;
+using Template.BetterInputHandling;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -66,6 +67,7 @@ namespace StarterAssets
         public void OnJump(InputValue value)
         {
             if (ServiceLocator.PauseService?.IsPaused ?? false) return;
+            if (ShouldGamepadPromptConsumeJump()) return;
             JumpInput(value.isPressed);
         }
 
@@ -110,6 +112,15 @@ namespace StarterAssets
 		public void PauseInput()
 		{
             ServiceLocator.PauseService?.Toggle();
+        }
+
+        private static bool ShouldGamepadPromptConsumeJump()
+        {
+            var inputService = BetterInputService.Instance;
+            return inputService != null
+                   && inputService.ActiveDevice.IsGamepad
+                   && inputService.HasCurrentPrompt
+                   && inputService.CurrentPrompt.ActionReference.Equals(BetterInputActionReference.Interact);
         }
 
 		//public void Action(bool newTriggerState)
