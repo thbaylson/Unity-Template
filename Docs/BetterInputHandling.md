@@ -34,6 +34,12 @@ For simple prompts, add `BetterInputPromptSource` to an object with a collider a
 
 `SettingsPopup` builds a tab bar at runtime. The tab bar is flanked by context switching glyphs: `Q` / `E` for keyboard and `LB` / `RB` for gamepad. The Controls tab lists actions from `BetterInputSettings.RemappableActions`, supports interactive rebinding, and persists overrides to `PlayerPrefs`.
 
+## Validation Workflow
+
+Playwright is part of the BetterInputHandling validation loop. After input, pause, settings, glyph, or prompt UI changes, run `npm.cmd run validate:webgl` for a fresh WebGL build or `npm.cmd run test:webgl` against an existing build. The suite drives the title settings entry point, audio-to-controls tab switching, Escape-opened pause menu mouse interaction, and pause-key behavior while settings owns focus. Review the screenshots and traces in `tests/playwright/test-results/` when investigating visual bugs.
+
+Chromium Playwright cannot reliably emulate a physical controller START button for Unity WebGL. For controller-only regressions, keep the closest keyboard/gamepad-path surrogate in Playwright and document the remaining manual hardware check in the bug or PR notes.
+
 ## Package Extraction Notes
 
 When extracting this into another project, move the portable scripts and assets into an embedded package, then replace or remove the template-specific pieces:

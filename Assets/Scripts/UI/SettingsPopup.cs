@@ -40,6 +40,7 @@ namespace Template.UI
         private Button controlsTabButton;
         private BetterInputGlyphView previousTabGlyph;
         private BetterInputGlyphView nextTabGlyph;
+        private GameObject controlsDefaultSelected;
 
         private enum SettingsTab
         {
@@ -74,12 +75,8 @@ namespace Template.UI
 
             EnsureTabbedSettingsUI();
             SubscribeToBetterInput();
+            activeTab = SettingsTab.Audio;
             SelectTab(activeTab);
-
-            if (defaultSelected != null && EventSystem.current != null)
-            {
-                EventSystem.current.SetSelectedGameObject(defaultSelected);
-            }
         }
 
         private void OnDisable()
@@ -192,7 +189,7 @@ namespace Template.UI
                 return;
             }
 
-            var root = transform as RectTransform;
+            var root = GetPopupPanelRoot();
             if (root == null)
             {
                 return;
@@ -200,7 +197,7 @@ namespace Template.UI
 
             CacheAudioContentRoots(root);
 
-            var tabBar = CreateRect("BetterInputTabBar", root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(420f, 36f));
+            var tabBar = CreateRect("BetterInputTabBar", root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -104f), new Vector2(460f, 34f));
             var tabLayout = tabBar.gameObject.AddComponent<HorizontalLayoutGroup>();
             tabLayout.childAlignment = TextAnchor.MiddleCenter;
             tabLayout.spacing = 8f;
@@ -215,14 +212,14 @@ namespace Template.UI
             nextTabGlyph.BindExplicitControls("<Keyboard>/e", "<Gamepad>/rightShoulder");
 
             controlsContainer = CreateRect("BetterInputControlsPanel", root, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
-            controlsContainer.offsetMin = new Vector2(48f, 72f);
-            controlsContainer.offsetMax = new Vector2(-48f, -96f);
+            controlsContainer.offsetMin = new Vector2(56f, 86f);
+            controlsContainer.offsetMax = new Vector2(-56f, -132f);
 
             var controlsLayout = controlsContainer.gameObject.AddComponent<VerticalLayoutGroup>();
             controlsLayout.childAlignment = TextAnchor.UpperCenter;
-            controlsLayout.spacing = 8f;
-            controlsLayout.padding = new RectOffset(8, 8, 8, 8);
-            controlsLayout.childControlWidth = true;
+            controlsLayout.spacing = 5f;
+            controlsLayout.padding = new RectOffset(6, 6, 6, 6);
+            controlsLayout.childControlWidth = false;
             controlsLayout.childControlHeight = false;
 
             BuildControlsRows();
@@ -232,16 +229,17 @@ namespace Template.UI
         private void BuildControlsRows()
         {
             controlRows.Clear();
+            controlsDefaultSelected = null;
 
             var header = CreateText("ControlsHeader", controlsContainer, "Controls", 22f, TextAlignmentOptions.Center);
-            header.rectTransform.sizeDelta = new Vector2(480f, 34f);
+            header.rectTransform.sizeDelta = new Vector2(620f, 30f);
 
             var service = BetterInputService.Instance;
             var settings = service != null ? service.Settings : null;
             if (settings == null || settings.RemappableActions.Count == 0)
             {
                 var unavailable = CreateText("ControlsUnavailable", controlsContainer, "Controls are unavailable.", 16f, TextAlignmentOptions.Center);
-                unavailable.rectTransform.sizeDelta = new Vector2(480f, 32f);
+                unavailable.rectTransform.sizeDelta = new Vector2(620f, 32f);
                 return;
             }
 
@@ -251,38 +249,47 @@ namespace Template.UI
             }
 
             var resetAll = CreateButton("ResetAllBindingsButton", controlsContainer, "Reset All", ResetAllBindings);
-            resetAll.GetComponent<RectTransform>().sizeDelta = new Vector2(180f, 34f);
+            resetAll.GetComponent<RectTransform>().sizeDelta = new Vector2(160f, 30f);
             RefreshControlRows();
         }
 
         private void CreateControlRow(BetterInputRemappableAction remappable)
         {
-            var rowRoot = CreateRect($"{remappable.DisplayName}Row", controlsContainer, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500f, 38f));
+            var rowRoot = CreateRect($"{remappable.DisplayName}Row", controlsContainer, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(660f, 32f));
             var rowLayout = rowRoot.gameObject.AddComponent<HorizontalLayoutGroup>();
             rowLayout.childAlignment = TextAnchor.MiddleCenter;
-            rowLayout.spacing = 10f;
+            rowLayout.spacing = 8f;
             rowLayout.childControlWidth = false;
             rowLayout.childControlHeight = true;
 
-            var label = CreateText("Label", rowRoot, remappable.DisplayName, 16f, TextAlignmentOptions.MidlineLeft);
-            label.rectTransform.sizeDelta = new Vector2(150f, 30f);
+            var label = CreateText("Label", rowRoot, remappable.DisplayName, 14f, TextAlignmentOptions.MidlineLeft);
+            label.rectTransform.sizeDelta = new Vector2(145f, 28f);
 
-            var glyph = CreateGlyph("Glyph", rowRoot, new Vector2(30f, 30f));
+            var glyph = CreateGlyph("Glyph", rowRoot, new Vector2(28f, 28f));
             glyph.BindAction(remappable.ActionReference);
 
-            var bindingText = CreateText("BindingText", rowRoot, string.Empty, 15f, TextAlignmentOptions.MidlineLeft);
-            bindingText.rectTransform.sizeDelta = new Vector2(110f, 30f);
+            var bindingText = CreateText("BindingText", rowRoot, string.Empty, 14f, TextAlignmentOptions.MidlineLeft);
+            bindingText.rectTransform.sizeDelta = new Vector2(230f, 28f);
+            bindingText.enableAutoSizing = true;
+            bindingText.fontSizeMin = 10f;
+            bindingText.fontSizeMax = 14f;
+            bindingText.overflowMode = TextOverflowModes.Ellipsis;
 
             var rebindButton = CreateButton("RebindButton", rowRoot, "Change", null);
-            rebindButton.GetComponent<RectTransform>().sizeDelta = new Vector2(90f, 30f);
+            rebindButton.GetComponent<RectTransform>().sizeDelta = new Vector2(82f, 28f);
 
             var resetButton = CreateButton("ResetButton", rowRoot, "Reset", null);
-            resetButton.GetComponent<RectTransform>().sizeDelta = new Vector2(78f, 30f);
+            resetButton.GetComponent<RectTransform>().sizeDelta = new Vector2(72f, 28f);
 
             var row = new ControlRow(remappable, glyph, bindingText, rebindButton, resetButton);
             rebindButton.onClick.AddListener(() => StartRebind(row));
             resetButton.onClick.AddListener(() => ResetBinding(row));
             controlRows.Add(row);
+
+            if (controlsDefaultSelected == null)
+            {
+                controlsDefaultSelected = rebindButton.gameObject;
+            }
         }
 
         private void SelectTab(SettingsTab tab)
@@ -304,6 +311,7 @@ namespace Template.UI
             SetTabButtonSelected(audioTabButton, activeTab == SettingsTab.Audio);
             SetTabButtonSelected(controlsTabButton, activeTab == SettingsTab.Controls);
             RefreshControlRows();
+            SelectDefaultForActiveTab();
         }
 
         private void CacheAudioContentRoots(RectTransform root)
@@ -320,6 +328,30 @@ namespace Template.UI
             if (masterSlider != null && masterSlider.transform.parent != null)
             {
                 audioContentRoots.Add(masterSlider.transform.parent.gameObject);
+            }
+        }
+
+        private RectTransform GetPopupPanelRoot()
+        {
+            if (closeButton != null && closeButton.transform.parent is RectTransform closeButtonRoot)
+            {
+                return closeButtonRoot;
+            }
+
+            return transform as RectTransform;
+        }
+
+        private void SelectDefaultForActiveTab()
+        {
+            if (EventSystem.current == null)
+            {
+                return;
+            }
+
+            var selected = activeTab == SettingsTab.Controls ? controlsDefaultSelected : defaultSelected;
+            if (selected != null && selected.activeInHierarchy)
+            {
+                EventSystem.current.SetSelectedGameObject(selected);
             }
         }
 
@@ -486,6 +518,9 @@ namespace Template.UI
             text.rectTransform.anchorMax = Vector2.one;
             text.rectTransform.offsetMin = Vector2.zero;
             text.rectTransform.offsetMax = Vector2.zero;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 10f;
+            text.fontSizeMax = 15f;
             return button;
         }
 

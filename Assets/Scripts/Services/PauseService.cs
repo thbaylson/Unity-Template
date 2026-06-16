@@ -33,6 +33,7 @@ namespace Template.Services
 
         private PlayerInput playerInput;
         private PauseMenuUI menuUI;
+        private bool acceptsPauseInput = true;
 
         /// The reason we assign this input action here instead of setting it up in StarterAssetsInputs is because 
         /// EventSystem was consuming the Close input before it ever got to StarterAssetsInputs. Thus, we subscribe 
@@ -54,6 +55,7 @@ namespace Template.Services
         public void RegisterPlayerInput(PlayerInput playerInput)
         {
             this.playerInput = playerInput;
+            RegisterPlayerInputWithUiModule();
             BetterInputService.Instance?.RegisterPlayerInput(playerInput);
             ApplyInputMap();
         }
@@ -64,11 +66,24 @@ namespace Template.Services
             menuUI.SetVisible(IsPaused);
         }
 
-        public void Toggle() => SetPaused(!IsPaused);
+        public void Toggle()
+        {
+            if (IsPaused && !acceptsPauseInput)
+            {
+                return;
+            }
+
+            SetPaused(!IsPaused);
+        }
 
         public void SetPaused(bool paused)
         {
             if (IsPaused == paused) return;
+
+            if (!paused)
+            {
+                acceptsPauseInput = true;
+            }
 
             IsPaused = paused;
 
@@ -82,10 +97,17 @@ namespace Template.Services
             PausedChanged?.Invoke(paused);
         }
 
-        // This is an attempt to fix the issue of cancelling the pause menu while inside the settings menu, thus letting 
-        // the player move around while the settings menu is still open.
+        // Subscreens such as settings own focus while pause remains active, so pause/cancel input should not unpause gameplay.
         public void SetUIFocus(bool isFocused)
         {
+            acceptsPauseInput = isFocused;
+
+            if (_cancelAction != null)
+            {
+                _cancelAction.performed -= OnCancelPerformed;
+                _cancelAction = null;
+            }
+
             if (isFocused)
             {
                 var uiModule = EventSystem.current?.GetComponent<InputSystemUIInputModule>();
@@ -95,18 +117,15 @@ namespace Template.Services
                     _cancelAction.performed += OnCancelPerformed;
                 }
             }
-            else
-            {
-                if (_cancelAction != null)
-                {
-                    _cancelAction.performed -= OnCancelPerformed;
-                    _cancelAction = null;
-                }
-            }
         }
 
         private void OnCancelPerformed(InputAction.CallbackContext ctx)
         {
+            if (!acceptsPauseInput)
+            {
+                return;
+            }
+
             SetPaused(false);
         }
 
@@ -122,6 +141,30 @@ namespace Template.Services
             }
 
             playerInput.SwitchCurrentActionMap(targetMap);
+        }
+
+        private void RegisterPlayerInputWithUiModule()
+        {
+            if (playerInput == null)
+            {
+                return;
+            }
+
+            var uiModule = EventSystem.current?.GetComponent<InputSystemUIInputModule>();
+            if (uiModule == null)
+            {
+                return;
+            }
+
+            if (uiModule.actionsAsset != playerInput.actions)
+            {
+                uiModule.actionsAsset = playerInput.actions;
+            }
+
+            if (playerInput.uiInputModule != uiModule)
+            {
+                playerInput.uiInputModule = uiModule;
+            }
         }
 
         private void OnDisable()

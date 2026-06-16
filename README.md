@@ -43,7 +43,8 @@ Key dependencies from `Packages/manifest.json`:
 
 ## Testing
 - **EditMode tests in the editor**: Open `Window > General > Test Runner`, switch to the `EditMode` tab, and run the suite.
-- **WebGL Playwright smoke tests**: Run `npm.cmd install`, then `npm.cmd run test:webgl:smoke` to test an existing WebGL build or `npm.cmd run validate:webgl:smoke` to build and test. The harness serves `Build/WebGL` by default and writes screenshots under `tests/playwright/test-results/`.
+- **WebGL Playwright validation**: Playwright is part of the input/UI validation workflow, not just a smoke test. Run `npm.cmd install`, then `npm.cmd run test:webgl` to test an existing WebGL build or `npm.cmd run validate:webgl` to build and test. The suite serves `Build/WebGL`, drives representative title/settings/pause flows, and writes screenshots, traces, and videos under `tests/playwright/test-results/` for review. The older `*:smoke` npm aliases still run the same validation suite for compatibility.
+- **When changing UI or input**: Add or update a Playwright path for reproducible visual/input bugs when feasible. If a bug needs hardware that Chromium cannot emulate reliably, document the manual coverage gap and keep the automated surrogate as close as practical.
 
 ## Credits
 - Music by Abstraction: https://tallbeard.itch.io/music-loop-bundle

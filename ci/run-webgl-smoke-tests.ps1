@@ -45,7 +45,7 @@ try {
 
     & npx.cmd @playwrightArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "Playwright smoke tests failed."
+        throw "Playwright validation tests failed."
     }
 }
 finally {

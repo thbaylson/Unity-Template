@@ -43,6 +43,7 @@ namespace Template.UI
             ServiceLocator.PauseService?.RegisterMenu(this);
 
             GetComponent<UILayerAttachment>()?.AttachToLayer();
+            DisableContainerRaycast(buttonContainer);
 
             if (resumeButton) resumeButton.onClick.AddListener(Resume);
             if (returnToTitleButton) returnToTitleButton.onClick.AddListener(ReturnToTitle);
@@ -97,6 +98,7 @@ namespace Template.UI
             // Make gamepad/keyboard navigation work immediately when the menu opens.
             if (paused && EventSystem.current != null && resumeButton != null)
             {
+                UIModeSwitcher.Instance?.ShowPointer();
                 EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
             }
         }
@@ -105,6 +107,20 @@ namespace Template.UI
         {
             SetVisible(true);
             ServiceLocator.PauseService?.SetUIFocus(true);
+        }
+
+        private static void DisableContainerRaycast(GameObject container)
+        {
+            if (container == null)
+            {
+                return;
+            }
+
+            var graphic = container.GetComponent<Graphic>();
+            if (graphic != null)
+            {
+                graphic.raycastTarget = false;
+            }
         }
     }
 }

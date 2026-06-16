@@ -9,7 +9,7 @@ const port = Number.parseInt(process.env.UNITY_WEBGL_PORT ?? "4173", 10);
 
 module.exports = defineConfig({
   testDir: __dirname,
-  testMatch: "webgl-smoke.spec.js",
+  testMatch: "webgl-validation.spec.js",
   timeout: 180000,
   expect: {
     timeout: 60000
